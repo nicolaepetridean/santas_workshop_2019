@@ -102,6 +102,24 @@ def plot_daily_load(days_load):
     return days_load
 
 
+def calculate_choice_id_per_family(solution, initial_data):
+    family_choice_ids = np.zeros(101)
+    row = 0
+    while row < solution.shape[0]:
+        family_id = initial_data.iloc[row, 0]
+        day = solution.iloc[row, 0]
+
+        choice = 0
+        for i in range(1, 10):
+            if initial_data.iloc[row, i] == day:
+                choice = i - 1
+
+        family_choice_ids[int(day)] = choice
+        row += 1
+
+    return family_choice_ids
+
+
 def get_choice_cost(solution, initial_data):
     days_cost = np.zeros(101)
     row = 0
@@ -110,7 +128,7 @@ def get_choice_cost(solution, initial_data):
         day = solution.iloc[row, 0]
 
         choice = 9
-        for i in range(1, 7):
+        for i in range(1, 9):
             if initial_data.iloc[row, i] == day:
                 choice = i - 1
         if choice > 0:
