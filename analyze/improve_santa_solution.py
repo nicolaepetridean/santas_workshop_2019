@@ -107,21 +107,25 @@ def search_for_move(family_choices_ids, family_choices_days, choice_cost, accoun
     for family_id, choice in enumerate(family_choices_ids):
         print('checking family : ' + str(family_id))
         if choice > 0:
-            for choice_id in range(1, 10):
+            for choice_id in range(0, 10):
                 family_choices_ids_copy = family_choices_ids.copy()
                 family_choices_days_copy = family_choices_days.copy()
                 people_count_copy = people_count.copy()
                 family_nr_of_people = df.iloc[family_id, 11]
-                if choice_id-1 != family_choices_ids[family_id]:
+                if choice_id != family_choices_ids[family_id]:
                     new_day = df.iloc[family_id, choice_id+1]
                     old_day = family_choices_days[family_id]
-                    family_choices_ids_copy[family_id] = choice_id+1
+                    family_choices_ids_copy[family_id] = choice_id
                     family_choices_days_copy[family_id] = new_day
                     people_count_copy[int(old_day)] -= family_nr_of_people
                     people_count_copy[int(new_day)] += family_nr_of_people
 
                     day_old_ok = 125 <= people_count_copy[int(old_day)] <= 300
                     day_new_ok = 125 <= people_count_copy[int(new_day)] <= 300
+
+                    if not day_old_ok or not day_new_ok:
+                        print("move breaks day constraint")
+                        continue
 
                     computed_cost = an_solution.get_choice_cost(family_choices_days_copy, df)
                     accounting_new = an_solution.get_total_accounting_cost(people_count_copy)
@@ -138,6 +142,10 @@ def search_for_move(family_choices_ids, family_choices_days, choice_cost, accoun
                         new_accounting = accounting_new
                         new_people_count = people_count_copy
                         break
+                    else:
+                        print("fam id " + str(family_id) + ", choice cost is: " + str(np.sum(computed_cost)) +
+                              " accounting cost is : " + str(accounting_new) + " trial choice_id is " + str(choice_id)
+                              + "family_choices_ids[family_id] is " + str(family_choices_ids[family_id]))
 
         if new_exchange_found_ids is not None:
             break

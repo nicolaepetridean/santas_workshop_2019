@@ -213,7 +213,7 @@ if __name__ == "__main__":
 
     # solution = load_solution_data('submission_76101.80064847361.csv')
     solution = load_solution_data('submission_76101.75179796087.csv')
-    # solution = load_solution_data('sample_submission_output0.csv')
+    # solution = load_solution_data('sample_submission_output_test.csv')
 
     #daily_load = plot_daily_load(compute_daily_load(solution, initial_data))
     daily_load = compute_daily_load(solution, initial_data)
