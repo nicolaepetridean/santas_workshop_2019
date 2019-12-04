@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 import analyze.load_santa_data as santa
+import analyze.analyze_solution as an_solution
 
 
 NDAYS = 100
@@ -38,41 +39,6 @@ def get_cost_by_choice(family_size):
     cost_by_choice[9] = 500 + (36 + 398) * family_size
 
     return list(zip(*cost_by_choice.items()))
-
-# Define the accounting cost function
-def accounting_cost(people_count):
-    # people_count[iday] is an array of the number of people each day,
-    # valid for iday=1 to NDAYS (iday=0 not used).
-    total_cost = 0.0
-    ppl_yester = people_count[NDAYS]
-    for iday in range(NDAYS,0,-1):
-        ppl_today = people_count[iday]
-        ppl_delta = np.abs(ppl_today - ppl_yester)
-        day_cost = (ppl_today - 125)*(ppl_today**(0.5+ppl_delta/50.0))/400.0
-        total_cost += day_cost
-        ##print("Day {}: delta = {}, $ {}".format(iday, ppl_delta, int(day_cost)))
-        # save for tomorrow
-        ppl_yester = people_count[iday]
-    # print("Total accounting cost: {:.2f}.  Ave costs:  {:.2f}/day,  {:.2f}/family".format(
-       #  total_cost,total_cost/NDAYS,total_cost/NFAMS))
-    return total_cost
-
-def plot_family_sizes(df):
-    family_size = df['n_people'].value_counts().sort_index()
-
-    plt.figure(figsize=(14, 6))
-    ax = sns.barplot(x=family_size.index, y=family_size.values)
-
-    for p in ax.patches:
-        ax.annotate(f'{p.get_height():.0f}\n({p.get_height() / sum(family_size) * 100:.1f}%)',
-                    xy=(p.get_x() + p.get_width() / 2., p.get_height()), ha='center', xytext=(0, 5),
-                    textcoords='offset points')
-
-    ax.set_ylim(0, 1.1 * max(family_size))
-    plt.xlabel('Family Size', fontsize=14)
-    plt.ylabel('Count', fontsize=14)
-    plt.title('Family Size Distribution', fontsize=20)
-    plt.show()
 
 
 def plot_family_wishes(choice_min, choice_max, df):
@@ -189,7 +155,7 @@ def search_for_exchange(family_choices_ids, family_choices_days, choice_cost, ac
                     people_count_copy[int(family_choices_days[family_id])] += family_sizes[family_id_2]
                     people_count_copy[int(family_choices_days[family_id_2])] -= family_sizes[family_id_2]
                     people_count_copy[int(family_choices_days[family_id_2])] += family_sizes[family_id]
-                    accounting_new = accounting_cost(people_count_copy)
+                    accounting_new = an_solution.accounting_cost(people_count_copy)
 
                     gain_cost = choice_cost - computed_cost
                     gain_accounting = accounting_old - accounting_new
@@ -235,7 +201,7 @@ def search_for_move(family_choices_ids, family_choices_days, choice_cost, accoun
                     day_new_ok = 125 < people_count_copy[int(new_day)] < 300
 
                     computed_cost = compute_choice_cost(family_choices_ids_copy, df)
-                    accounting_new = accounting_cost(people_count_copy)
+                    accounting_new = an_solution.accounting_cost(people_count_copy)
 
                     gain_cost = choice_cost - computed_cost
                     gain_accounting = accounting_old - accounting_new
@@ -288,7 +254,7 @@ if __name__ == "__main__":
 
     people_count, family_choices_days, family_choices_ids = choose_family_wishes(0, 4, df)
 
-    accounting = accounting_cost(people_count)
+    accounting = an_solution.accounting_cost(people_count)
 
     choice_cost = compute_choice_cost(family_choices_ids, df)
     print("Accounting cost is : " + str(accounting))
