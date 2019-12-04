@@ -82,17 +82,16 @@ def plot_daily_load(solution, initial_data):
         n_people = initial_data.iloc[row, 11]
         days_load[day] += n_people
         row += 1
-    days_load = days_load[1:]
     print(" sum of all people is :" + str(np.sum(days_load)))
     print(" min of all days is :" + str(np.min(days_load)))
     print(" max of all days is :" + str(np.max(days_load)))
     plt.figure(figsize=(34, 50))
     newdf = pd.DataFrame(days_load)
     ax = sns.barplot(x=newdf.index, y=np.concatenate(newdf.values))
-    ax.set_ylim(0, 1.1 * 3000)
-    plt.xlabel('Family Size', fontsize=14)
+    ax.set_ylim(0, 1.1 * 1000)
+    plt.xlabel('day', fontsize=14)
     plt.ylabel('Count', fontsize=14)
-    plt.title('Family Size Distribution', fontsize=20)
+    plt.title('Day Load', fontsize=20)
     plt.show()
 
     return days_load
@@ -158,7 +157,7 @@ if __name__ == "__main__":
     solution = load_solution_data('submission_76101.80064847361.csv')
 
     daily_load = plot_daily_load(solution, initial_data)
-    #
+
     choice_cost = plot_and_return_choice_cost(solution, initial_data)
 
     accounting_cost = get_accounting_cost(daily_load)
