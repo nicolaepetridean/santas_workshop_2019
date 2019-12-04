@@ -68,7 +68,7 @@ def plot_family_wishes(choice_min, choice_max, df):
 
 def return_family_data():
     data_load = santa.SantaDataLoad()
-    df = data_load.load_file("/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/")
+    df = data_load.load_family_initial_data("/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/")
     return df
 
 
@@ -166,35 +166,8 @@ def search_for_move(family_choices_ids, family_choices_days, choice_cost, accoun
 
 
 if __name__ == "__main__":
-    print(get_cost_by_choice(2))
-    print(get_cost_by_choice(3))
-    print(get_cost_by_choice(4))
-    print(get_cost_by_choice(5))
-    print(get_cost_by_choice(6))
-    print(get_cost_by_choice(7))
-    print(get_cost_by_choice(8))
 
     df = return_family_data()
-
-    # plot_family_sizes()
-
-    # Test it with several test cases
-    # Constant 210, cost should be 3.08/day
-    # people_count = np.concatenate((295 + np.zeros(50), 125 + np.zeros(51)), axis=0)
-    # Alternate 210 +/-25 = 185, 235. Should be ~ 674/day
-    # people_count = (210 + 25*np.cos(np.pi*np.arange(0,102))).astype(int)
-    # Alternate 210 +/-50 = 160, 260. Should be ~ 194,000/day
-    ##people_count = (210 + 50*np.cos(np.pi*np.arange(0,102))).astype(int)
-    #
-    # accounting = accounting_cost(people_count)
-
-    # plot_family_wishes(0,1)
-
-    # plot_family_wishes(1, 2)
-
-    # plot_family_wishes(0, 4)
-
-    people_count, family_choices_days, family_choices_ids = choose_family_wishes(0, 4, df)
 
     accounting = an_solution.accounting_cost(people_count)
 

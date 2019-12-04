@@ -126,7 +126,7 @@ def compute_choice_cost(family_choices_ids, df):
 
 def return_family_data():
     data_load = santa.SantaDataLoad()
-    df = data_load.load_file("/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/")
+    df = data_load.load_family_initial_data("/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/")
     return df
 
 

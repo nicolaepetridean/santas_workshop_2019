@@ -12,7 +12,7 @@ class SantaDataLoad:
         self.total_nr_of_people=None
         self.total_nr_of_families = None
 
-    def load_file(self, path):
+    def load_family_initial_data(self, path):
         self.family_data = pd.read_csv(os.path.join(path, 'family_data.csv'), delimiter=',')
         return self.family_data
 

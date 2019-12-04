@@ -21,7 +21,7 @@ family_size_dict = data[['n_people']].to_dict()['n_people']
 
 def return_family_data():
     data_load = santa.SantaDataLoad()
-    df = data_load.load_file("/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/")
+    df = data_load.load_family_initial_data("/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/")
     return df
 
 
@@ -74,7 +74,7 @@ def calculate_accounting_cost(daily_occupancy, days):
     return accounting_cost
 
 
-def plot_daily_load(solution, initial_data):
+def compute_daily_load(solution, initial_data):
     days_load = np.zeros(101)
     row = 0
     while row < solution.shape[0]:
@@ -85,6 +85,11 @@ def plot_daily_load(solution, initial_data):
     print(" sum of all people is :" + str(np.sum(days_load)))
     print(" min of all days is :" + str(np.min(days_load)))
     print(" max of all days is :" + str(np.max(days_load)))
+
+    return days_load
+
+
+def plot_daily_load(days_load):
     plt.figure(figsize=(34, 50))
     newdf = pd.DataFrame(days_load)
     ax = sns.barplot(x=newdf.index, y=np.concatenate(newdf.values))
@@ -162,7 +167,7 @@ if __name__ == "__main__":
     solution = load_solution_data('submission_76101.75179796087.csv')
     #solution = load_solution_data('sample_submission_output.csv')
 
-    daily_load = plot_daily_load(solution, initial_data)
+    daily_load = plot_daily_load(compute_daily_load(solution, initial_data))
 
     choice_cost = plot_choice_cost(get_choice_cost(solution, initial_data))
 
