@@ -61,6 +61,8 @@ def search_for_exchange(family_choices_ids, family_choices_days, choice_cost, ac
     new_exchange_found_ids = None
     new_exchange_found_days = None
     new_cost = 0
+    new_accounting = 0
+    new_people_count = None
     for family_id, choice in enumerate(family_choices_ids):
         if choice > 0:
             for family_id_2, choice_2 in enumerate(family_choices_ids):
@@ -74,28 +76,36 @@ def search_for_exchange(family_choices_ids, family_choices_days, choice_cost, ac
                     people_count_copy = people_count.copy()
 
                     computed_cost = an_solution.get_choice_cost(family_choices_days_copy, df)
+
                     people_count_copy[int(family_choices_days[family_id])] -= family_sizes[family_id]
                     people_count_copy[int(family_choices_days[family_id])] += family_sizes[family_id_2]
                     people_count_copy[int(family_choices_days[family_id_2])] -= family_sizes[family_id_2]
                     people_count_copy[int(family_choices_days[family_id_2])] += family_sizes[family_id]
-                    accounting_new = an_solution.accounting_cost(people_count_copy)
+                    accounting_new = an_solution.get_total_accounting_cost(people_count_copy)
 
-                    gain_cost = choice_cost - computed_cost
-                    gain_accounting = accounting_old - accounting_new
+                    day_old_ok = 125 <= people_count_copy[int(family_choices_days[family_id])] <= 300
+                    day_new_ok = 125 <= people_count_copy[int(family_choices_days[family_id_2])] <= 300
 
-                    switch_cond = gain_cost > 0 and (gain_accounting > 0 or gain_cost > (accounting_new - accounting_old))
-                    switch_cond_2 = gain_accounting > 0 and (gain_cost > 0 or gain_accounting > (computed_cost - choice_cost))
+                    if not day_old_ok or not day_new_ok:
+                        print("move breaks day constraint")
+                        continue
 
-                    if switch_cond or switch_cond_2:
-                        print("BINGO, gain_cost is: " + str(computed_cost) + " accounting cost is : " + str(accounting_new))
+                    old_total_cost = np.sum(choice_cost) + accounting_old
+                    new_total_cost = np.sum(computed_cost) + accounting_new
+
+                    if (new_total_cost < old_total_cost) and day_old_ok and day_new_ok:
+                        print("BINGO, fam id " + str(family_id) + ", choice cost is: " + str(np.sum(computed_cost)) +
+                              " accounting cost is : " + str(accounting_new))
                         new_exchange_found_ids = family_choices_ids_copy
                         new_exchange_found_days = family_choices_days_copy
                         new_cost = computed_cost
+                        new_accounting = accounting_new
+                        new_people_count = people_count_copy
                         break
         if new_exchange_found_ids is not None:
             break
 
-    return new_exchange_found_ids, new_exchange_found_days, new_cost, people_count_copy, accounting_new
+    return new_exchange_found_ids, new_exchange_found_days, new_cost, new_people_count, new_accounting
 
 
 def search_for_move(family_choices_ids, family_choices_days, choice_cost, accounting_old, people_count, family_sizes, df):
@@ -176,7 +186,8 @@ if __name__ == "__main__":
     family_sizes = an_solution.return_family_sizes(initial_data)
 
     ## don't touch it is good to optimize the second metric mainly (once the proportion is set.
-    # while choice_cost > 200000:
+    # iteration = 0
+    # while np.sum(choice_cost) > 60000 or iteration > 100:
     #     new_exchange_found, new_exchange_found_days, new_cost, people_count_copy, accounting_new\
     #         = search_for_exchange(family_choices_ids,
     #                             family_choices_days,
