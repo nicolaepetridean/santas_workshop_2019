@@ -73,7 +73,7 @@ def search_for_exchange(family_choices_ids, family_choices_days, choice_cost, ac
                     family_choices_days_copy[family_id_2] = family_choices_days[family_id]
                     people_count_copy = people_count.copy()
 
-                    computed_cost = compute_choice_cost(family_choices_ids_copy, df)
+                    computed_cost = an_solution.get_choice_cost(family_choices_days_copy, df)
                     people_count_copy[int(family_choices_days[family_id])] -= family_sizes[family_id]
                     people_count_copy[int(family_choices_days[family_id])] += family_sizes[family_id_2]
                     people_count_copy[int(family_choices_days[family_id_2])] -= family_sizes[family_id_2]
@@ -112,9 +112,9 @@ def search_for_move(family_choices_ids, family_choices_days, choice_cost, accoun
                 family_choices_days_copy = family_choices_days.copy()
                 people_count_copy = people_count.copy()
                 family_nr_of_people = df.iloc[family_id, 11]
-                if choice_id-1 != family_choices_ids[family_id]:
+                if choice_id != family_choices_ids[family_id]:
                     new_day = df.iloc[family_id, choice_id]
-                    old_day = family_choices_days[family_id]
+                    old_day = family_choices_days['assigned_day'][family_id]
                     family_choices_ids_copy[family_id] = choice_id-1
                     family_choices_days_copy[family_id] = new_day
                     people_count_copy[int(old_day)] -= family_nr_of_people
@@ -123,7 +123,7 @@ def search_for_move(family_choices_ids, family_choices_days, choice_cost, accoun
                     day_old_ok = 125 < people_count_copy[int(old_day)] < 300
                     day_new_ok = 125 < people_count_copy[int(new_day)] < 300
 
-                    computed_cost = an_solution.get_accounting_cost(people_count_copy, df)
+                    computed_cost = an_solution.family_choices_days_copy(family_choices_days_copy, df)
                     accounting_new = an_solution.get_accounting_cost(people_count_copy)
 
                     gain_cost = choice_cost - computed_cost
@@ -155,13 +155,13 @@ def return_family_data():
 if __name__ == "__main__":
 
     solution = an_solution.load_solution_data('submission_76101.75179796087.csv')
-
     initial_data = return_family_data()
 
     days_load = an_solution.compute_daily_load(solution, initial_data)
 
-    accounting_cost = an_solution.accounting_cost(days_load)
+    accounting_cost = an_solution.get_accounting_cost(days_load)
     choice_cost = an_solution.get_choice_cost(solution, initial_data)
+    family_choices_ids = an_solution.calculate_choice_id_per_family(solution, initial_data)
 
     print("Accounting cost is : " + str(accounting_cost))
     print("choice cost is : " + str(np.sum(choice_cost)))
@@ -185,19 +185,19 @@ if __name__ == "__main__":
 
     # optimize for first metric (choice cost)
     iteration = 0
-    while choice_cost > 200000 or iteration > 10000:
+    while np.sum(choice_cost) > 60000 or iteration > 100:
         new_exchange_found, new_exchange_found_days, new_cost, people_count_copy, accounting_new\
               = search_for_move(family_choices_ids,
-                                  family_choices_days,
+                                  solution,
                                   choice_cost,
-                                  accounting,
+                                  accounting_cost,
                                   days_load,
                                   family_sizes,
                                   initial_data)
         family_choices_ids = new_exchange_found
         family_choices_days = new_exchange_found_days
         choice_cost = new_cost
-        accounting = accounting_new
+        accounting_cost = accounting_new
         days_load = people_count_copy
 
         data_load = santa.SantaDataLoad()
@@ -206,7 +206,7 @@ if __name__ == "__main__":
         iteration += 1
 
 
-    print("Accounting cost is : " + str(accounting))
+    print("Accounting cost is : " + str(accounting_cost))
     print("choice cost is : " + str(np.sum(choice_cost)))
 
 
