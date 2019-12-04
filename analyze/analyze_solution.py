@@ -214,7 +214,7 @@ if __name__ == "__main__":
     # solution = load_solution_data('submission_76101.75179796087.csv')
     # solution = load_solution_data('submission_76101.test_out_local_minima.csv')
     # solution = load_solution_data('sample_submission_output_test.csv')
-    solution = load_solution_data('sample_submission_output19.csv')
+    solution = load_solution_data('sample_submission_output22.csv')
 
     #daily_load = plot_daily_load(compute_daily_load(solution, initial_data))
     daily_load = compute_daily_load(solution, initial_data)
