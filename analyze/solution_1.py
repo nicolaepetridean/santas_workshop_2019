@@ -61,7 +61,7 @@ def accounting_cost(people_count):
 def plot_family_sizes():
     data_load = santa.SantaDataLoad()
 
-    df = data_load.load_file("/Users/nicolaepetridean/jde/projects/titanic/try/santadata/")
+    df = data_load.load_file("/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/")
     family_size = df['n_people'].value_counts().sort_index()
 
     plt.figure(figsize=(14, 6))
@@ -83,7 +83,7 @@ def plot_family_wishes(choice_min, choice_max):
     days_vs_people = np.zeros(101)
     data_load = santa.SantaDataLoad()
 
-    df = data_load.load_file("/Users/nicolaepetridean/jde/projects/titanic/try/santadata/")
+    df = data_load.load_file("/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/")
 
     row = 0
     while row < df.shape[0]:
@@ -110,7 +110,7 @@ def choose_family_wishes(choice_max):
     days_vs_people = np.zeros(101)
     data_load = santa.SantaDataLoad()
 
-    df = data_load.load_file("/Users/nicolaepetridean/jde/projects/titanic/try/santadata/")
+    df = data_load.load_file("/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/")
 
     family_id = 0
     choice_id_per_family = np.zeros(5000)
@@ -211,7 +211,7 @@ if __name__ == "__main__":
 
     data_load = santa.SantaDataLoad()
 
-    df = data_load.load_file("/Users/nicolaepetridean/jde/projects/titanic/try/santadata/")
+    df = data_load.load_file("/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/")
 
     choice_cost = np.zeros(5000)
     row = 0

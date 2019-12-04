@@ -57,7 +57,7 @@ class SantaDataLoad:
 
 if __name__ == "__main__":
     # data_load = SantaDataLoad()
-    # data_load.load_file("/Users/nicolaepetridean/jde/projects/titanic/try/santadata/")
+    # data_load.load_file("/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/")
     # data_load.count_nr_of_families()
     # data_load.count_nr_of_people_attending()
     # print('total number of people is : ' + str(data_load.count_nr_of_people_attending()))
@@ -67,4 +67,4 @@ if __name__ == "__main__":
     # print('optimal day load : ' + str(data_load.optimal_day_load()))
 
     data_load = SantaDataLoad()
-    data_load.fix_submission("/Users/nicolaepetridean/jde/projects/titanic/try/santadata/")
+    data_load.fix_submission("/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/")

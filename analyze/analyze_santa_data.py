@@ -160,7 +160,7 @@ def compute_choice_cost(family_choices_ids, df):
 
 def return_family_data():
     data_load = santa.SantaDataLoad()
-    df = data_load.load_file("/Users/nicolaepetridean/jde/projects/titanic/try/santadata/")
+    df = data_load.load_file("/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/")
     return df
 
 
@@ -328,7 +328,7 @@ if __name__ == "__main__":
         people_count = people_count_copy
 
         data_load = santa.SantaDataLoad()
-        data_load.save_submission('/Users/nicolaepetridean/jde/projects/titanic/try/santadata/', family_choices_days)
+        data_load.save_submission('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/', family_choices_days)
 
         iteration += 1
 
