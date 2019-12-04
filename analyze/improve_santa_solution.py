@@ -65,64 +65,6 @@ def plot_family_wishes(choice_min, choice_max, df):
     plt.show()
 
 
-def choose_family_wishes(choice_min, choice_max, df):
-    days_vs_people = np.zeros(101)
-
-    row = 0
-    family_choice_day = np.zeros(5000)
-    family_choice_id = np.zeros(5000)
-
-    while row < df.shape[0]:
-        nr_of_people = df.iloc[row, 11]
-        minim = 1000
-        final_choice_day = 0
-        final_choice_id = 0
-        days_cost = np.zeros(choice_max - choice_min)
-        for choice in range(choice_min, choice_max):
-            day = df.iloc[row, choice + 1]
-            days_cost[choice] = days_vs_people[day] + nr_of_people
-            if (days_cost[choice] < minim):
-                minim = days_cost[choice]
-                final_choice_day = day
-                final_choice_id = choice
-
-        family_choice_day[df.iloc[row, 0]] = final_choice_day
-        family_choice_id[df.iloc[row, 0]] = final_choice_id
-        days_vs_people[final_choice_day] = days_vs_people[final_choice_day] + nr_of_people
-
-        row = row + 1
-
-    print("validate the number of people is right " + str(np.sum(days_vs_people)))
-
-    plt.figure(figsize=(34, 50))
-    newdf = pd.DataFrame(days_vs_people)
-    ax = sns.barplot(x=newdf.index, y=np.concatenate(newdf.values))
-
-    ax.set_ylim(0, 1.1 * 3000)
-    plt.xlabel('Family Size', fontsize=14)
-    plt.ylabel('Count', fontsize=14)
-    plt.title('Family Size Distribution', fontsize=20)
-    plt.show()
-
-    return (days_vs_people, family_choice_day, family_choice_id)
-
-
-def compute_choice_cost(family_choices_ids, df):
-    choice_cost = 0
-    row = 0
-
-    while row < df.shape[0]:
-        nr_of_people = df.iloc[row, 11]
-        family_id = df.iloc[row, 0]
-        final_choice_id = family_choices_ids[family_id]
-        if final_choice_id > 0:
-            choice_cost = choice_cost + get_cost_by_choice(nr_of_people)[1][int(final_choice_id-1)]
-
-        row += 1
-
-    # print('choice_cost is : ' + str(choice_cost))
-    return choice_cost
-
 
 def return_family_data():
     data_load = santa.SantaDataLoad()
@@ -200,8 +142,8 @@ def search_for_move(family_choices_ids, family_choices_days, choice_cost, accoun
                     day_old_ok = 125 < people_count_copy[int(old_day)] < 300
                     day_new_ok = 125 < people_count_copy[int(new_day)] < 300
 
-                    computed_cost = compute_choice_cost(family_choices_ids_copy, df)
-                    accounting_new = an_solution.accounting_cost(people_count_copy)
+                    computed_cost = an_solution.get_accounting_cost(people_count_copy, df)
+                    accounting_new = an_solution.get_accounting_cost(people_count_copy)
 
                     gain_cost = choice_cost - computed_cost
                     gain_accounting = accounting_old - accounting_new

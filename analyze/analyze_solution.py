@@ -80,7 +80,7 @@ def plot_daily_load(solution, initial_data):
     while row < solution.shape[0]:
         day = solution.iloc[row, 0]
         n_people = initial_data.iloc[row, 11]
-        days_load[day] += n_people
+        days_load[int(day)] += n_people
         row += 1
     print(" sum of all people is :" + str(np.sum(days_load)))
     print(" min of all days is :" + str(np.min(days_load)))
@@ -97,7 +97,7 @@ def plot_daily_load(solution, initial_data):
     return days_load
 
 
-def plot_and_return_choice_cost(solution, initial_data):
+def get_choice_cost(solution, initial_data):
     days_cost = np.zeros(101)
     row = 0
     while row < solution.shape[0]:
@@ -109,9 +109,13 @@ def plot_and_return_choice_cost(solution, initial_data):
             if initial_data.iloc[row, i] == day:
                 choice = i - 1
         if choice > 0:
-            days_cost[day] += get_cost_by_choice(family_size)[1][choice-1]
+            days_cost[int(day)] += get_cost_by_choice(family_size)[1][choice-1]
         row += 1
 
+    return days_cost
+
+
+def plot_choice_cost(days_cost):
     days_cost = days_cost[1:]
     print(" sum of all cost is :" + str(np.sum(days_cost)))
     print(" min of all days cost is :" + str(np.min(days_cost)))
@@ -154,11 +158,13 @@ def get_accounting_cost(daily_occupancy):
 if __name__ == "__main__":
     initial_data = return_family_data()
 
-    solution = load_solution_data('submission_76101.80064847361.csv')
+    #solution = load_solution_data('submission_76101.80064847361.csv')
+    solution = load_solution_data('submission_76101.75179796087.csv')
+    #solution = load_solution_data('sample_submission_output.csv')
 
     daily_load = plot_daily_load(solution, initial_data)
 
-    choice_cost = plot_and_return_choice_cost(solution, initial_data)
+    choice_cost = plot_choice_cost(get_choice_cost(solution, initial_data))
 
     accounting_cost = get_accounting_cost(daily_load)
 
