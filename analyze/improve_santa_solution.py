@@ -106,33 +106,31 @@ def search_for_move(family_choices_ids, family_choices_days, choice_cost, accoun
     new_people_count = None
     for family_id, choice in enumerate(family_choices_ids):
         if choice > 0:
-
-            for choice_id in range(1, 5):
+            for choice_id in range(1, 10):
                 family_choices_ids_copy = family_choices_ids.copy()
                 family_choices_days_copy = family_choices_days.copy()
                 people_count_copy = people_count.copy()
                 family_nr_of_people = df.iloc[family_id, 11]
-                if choice_id != family_choices_ids[family_id]:
-                    new_day = df.iloc[family_id, choice_id]
-                    old_day = family_choices_days['assigned_day'][family_id]
-                    family_choices_ids_copy[family_id] = choice_id-1
+                if choice_id-1 != family_choices_ids[family_id]:
+                    new_day = df.iloc[family_id, choice_id+1]
+                    old_day = family_choices_days[family_id]
+                    family_choices_ids_copy[family_id] = choice_id+1
                     family_choices_days_copy[family_id] = new_day
                     people_count_copy[int(old_day)] -= family_nr_of_people
-                    people_count_copy[int(new_day)] -= family_nr_of_people
+                    people_count_copy[int(new_day)] += family_nr_of_people
 
-                    day_old_ok = 125 < people_count_copy[int(old_day)] < 300
-                    day_new_ok = 125 < people_count_copy[int(new_day)] < 300
+                    day_old_ok = 125 <= people_count_copy[int(old_day)] <= 300
+                    day_new_ok = 125 <= people_count_copy[int(new_day)] <= 300
 
-                    computed_cost = an_solution.family_choices_days_copy(family_choices_days_copy, df)
+                    computed_cost = an_solution.get_choice_cost(family_choices_days_copy, df)
                     accounting_new = an_solution.get_accounting_cost(people_count_copy)
 
-                    gain_cost = choice_cost - computed_cost
-                    gain_accounting = accounting_old - accounting_new
+                    old_total_cost = np.sum(choice_cost) + accounting_old
+                    new_total_cost = np.sum(computed_cost) + accounting_new
 
-                    switch_cond = gain_cost > 0 and (gain_accounting > 0 or gain_cost > (accounting_new - accounting_old))
-                    switch_cond_2 = gain_accounting > 0 and (gain_cost > 0 or gain_accounting > (computed_cost - choice_cost))
-                    if (switch_cond or switch_cond_2) and day_old_ok and day_new_ok:
-                        print("BINGO, fam id " + str(family_id) + ", choice cost is: " + str(computed_cost) + " accounting cost is : " + str(accounting_new))
+                    if (new_total_cost < old_total_cost) and day_old_ok and day_new_ok:
+                        print("BINGO, fam id " + str(family_id) + ", choice cost is: " + str(np.sum(computed_cost)) +
+                              " accounting cost is : " + str(accounting_new))
                         new_exchange_found_ids = family_choices_ids_copy
                         new_exchange_found_days = family_choices_days_copy
                         new_cost = computed_cost
@@ -162,6 +160,7 @@ if __name__ == "__main__":
     accounting_cost = an_solution.get_accounting_cost(days_load)
     choice_cost = an_solution.get_choice_cost(solution, initial_data)
     family_choices_ids = an_solution.calculate_choice_id_per_family(solution, initial_data)
+    family_choices_days = np.array(solution['assigned_day'])
 
     print("Accounting cost is : " + str(accounting_cost))
     print("choice cost is : " + str(np.sum(choice_cost)))
@@ -188,7 +187,7 @@ if __name__ == "__main__":
     while np.sum(choice_cost) > 60000 or iteration > 100:
         new_exchange_found, new_exchange_found_days, new_cost, people_count_copy, accounting_new\
               = search_for_move(family_choices_ids,
-                                  solution,
+                                  family_choices_days,
                                   choice_cost,
                                   accounting_cost,
                                   days_load,
@@ -201,7 +200,7 @@ if __name__ == "__main__":
         days_load = people_count_copy
 
         data_load = santa.SantaDataLoad()
-        data_load.save_submission('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/', family_choices_days)
+        data_load.save_submission('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/', iteration, family_choices_days)
 
         iteration += 1
 

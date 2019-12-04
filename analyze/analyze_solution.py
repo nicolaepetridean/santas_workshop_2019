@@ -56,24 +56,6 @@ def get_cost_by_choice(family_size):
     return list(zip(*cost_by_choice.items()))
 
 
-def calculate_accounting_cost(daily_occupancy, days):
-    # Calculate the accounting cost
-    # The first day (day 100) is treated special
-    accounting_cost = (daily_occupancy[days[0]] - 125.0) / 400.0 * daily_occupancy[days[0]] ** (0.5)
-    # using the max function because the soft constraints might allow occupancy to dip below 125
-    accounting_cost = max(0, accounting_cost)
-
-    # Loop over the rest of the days, keeping track of previous count
-    yesterday_count = daily_occupancy[days[0]]
-    for day in days[1:]:
-        today_count = daily_occupancy[day]
-        diff = abs(today_count - yesterday_count)
-        accounting_cost += max(0, (daily_occupancy[day] - 125.0) / 400.0 * daily_occupancy[day] ** (0.5 + diff / 50.0))
-        yesterday_count = today_count
-
-    return accounting_cost
-
-
 def compute_daily_load(solution, initial_data):
     days_load = np.zeros(101)
     row = 0
@@ -103,9 +85,9 @@ def plot_daily_load(days_load):
 
 
 def calculate_choice_id_per_family(solution, initial_data):
-    family_choice_ids = np.zeros(101)
+    family_choice_ids = np.zeros(5000)
     row = 0
-    while row < solution.shape[0]:
+    while row < initial_data.shape[0]:
         family_id = initial_data.iloc[row, 0]
         day = solution.iloc[row, 0]
 
@@ -113,8 +95,9 @@ def calculate_choice_id_per_family(solution, initial_data):
         for i in range(1, 10):
             if initial_data.iloc[row, i] == day:
                 choice = i - 1
+                break
 
-        family_choice_ids[int(day)] = choice
+        family_choice_ids[int(family_id)] = choice
         row += 1
 
     return family_choice_ids
@@ -125,10 +108,13 @@ def get_choice_cost(solution, initial_data):
     row = 0
     while row < solution.shape[0]:
         family_size = initial_data.iloc[row, 11]
-        day = solution.iloc[row, 0]
+        try:
+            day = solution.iloc[row, 0]
+        except:
+            day = solution[row]
 
         choice = 9
-        for i in range(1, 9):
+        for i in range(1, 10):
             if initial_data.iloc[row, i] == day:
                 choice = i - 1
         if choice > 0:
@@ -181,13 +167,15 @@ def get_accounting_cost(daily_occupancy):
 if __name__ == "__main__":
     initial_data = return_family_data()
 
-    #solution = load_solution_data('submission_76101.80064847361.csv')
-    solution = load_solution_data('submission_76101.75179796087.csv')
-    #solution = load_solution_data('sample_submission_output.csv')
+    # solution = load_solution_data('submission_76101.80064847361.csv')
+    # solution = load_solution_data('submission_76101.75179796087.csv')
+    solution = load_solution_data('sample_submission_output0.csv')
 
-    daily_load = plot_daily_load(compute_daily_load(solution, initial_data))
+    #daily_load = plot_daily_load(compute_daily_load(solution, initial_data))
+    daily_load = compute_daily_load(solution, initial_data)
 
-    choice_cost = plot_choice_cost(get_choice_cost(solution, initial_data))
+    #choice_cost = plot_choice_cost(get_choice_cost(solution, initial_data))
+    choice_cost = np.sum(get_choice_cost(solution, initial_data))
 
     accounting_cost = get_accounting_cost(daily_load)
 

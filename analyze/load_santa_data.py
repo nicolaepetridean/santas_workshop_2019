@@ -20,10 +20,10 @@ class SantaDataLoad:
         self.family_data = pd.read_csv(os.path.join(full_path), index_col='family_id')
         return self.family_data
 
-    def save_submission(self, path, column):
+    def save_submission(self, path, iter, column):
         self.submission = pd.read_csv(os.path.join(path, 'sample_submission.csv'), delimiter=',')
         self.submission = self.submission.assign(assigned_day = column)
-        self.submission.to_csv(os.path.join(path, 'sample_submission_output.csv'), index=None, header=True)
+        self.submission.to_csv(os.path.join(path, 'sample_submission_output' + str(iter) + '.csv'), index=None, header=True)
         return True
 
     def fix_submission(self, path):
