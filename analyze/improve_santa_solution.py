@@ -20,27 +20,7 @@ RANDOM_SEED = 127
 np.random.seed(RANDOM_SEED)
 
 
-def get_cost_by_choice(family_size):
-    """
-    Input : num_members
-    Output : [(choice number indices),(corresponding cost)]
-    """
-
-    cost_by_choice = {}
-
-    cost_by_choice[1] = 50
-    cost_by_choice[2] = 50 + 9 * family_size
-    cost_by_choice[3] = 100 + 9 * family_size
-    cost_by_choice[4] = 200 + 9 * family_size
-    cost_by_choice[5] = 200 + 18 * family_size
-    cost_by_choice[6] = 300 + 18 * family_size
-    cost_by_choice[7] = 400 + 36 * family_size
-    cost_by_choice[8] = 500 + (36 + 199) * family_size
-    cost_by_choice[9] = 500 + (36 + 398) * family_size
-
-    return list(zip(*cost_by_choice.items()))
-
-
+# TODO: to be refactored & moved to analyze solution
 def plot_family_wishes(choice_min, choice_max, df):
     days_vs_people = np.zeros(101)
 
@@ -65,13 +45,14 @@ def plot_family_wishes(choice_min, choice_max, df):
     plt.show()
 
 
-
+# TODO: to be moved to load_santa_data
 def return_family_data():
     data_load = santa.SantaDataLoad()
     df = data_load.load_family_initial_data("/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/")
     return df
 
 
+# TODO: to be moved to load_santa_data
 def return_family_sizes(df):
     return list(df['n_people'])
 
