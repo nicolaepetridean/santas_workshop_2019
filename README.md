@@ -11,3 +11,9 @@ Dec 24, the value 2 represents Dec 23, etc. Each family also has a
 number of people attending, n_people.
 
 Every family must be scheduled for one and only one assigned_day
+
+
+# ideas to try : do not forget
+ -   try to move one family out of choices, even if second metric is
+    blowing. and give some room to the first metric to improve.
+ -   try to improve a very costy choice/day with another day that has cost.

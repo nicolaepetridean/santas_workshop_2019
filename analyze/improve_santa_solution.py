@@ -146,16 +146,26 @@ def search_for_move(family_choices_ids, family_choices_days, choice_cost, accoun
     return new_exchange_found_ids, new_exchange_found_days, new_cost, new_people_count, new_accounting
 
 
+def return_family_data():
+    data_load = santa.SantaDataLoad()
+    df = data_load.load_family_initial_data("/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/")
+    return df
+
+
 if __name__ == "__main__":
 
-    df = return_family_data()
+    solution = an_solution.load_solution_data('submission_76101.75179796087.csv')
 
-    accounting = an_solution.accounting_cost(people_count)
+    initial_data = return_family_data()
 
-    choice_cost = compute_choice_cost(family_choices_ids, df)
-    print("Accounting cost is : " + str(accounting))
+    days_load = an_solution.compute_daily_load(solution, initial_data)
+
+    accounting_cost = an_solution.accounting_cost(days_load)
+    choice_cost = an_solution.get_choice_cost(solution, initial_data)
+
+    print("Accounting cost is : " + str(accounting_cost))
     print("choice cost is : " + str(np.sum(choice_cost)))
-    family_sizes = return_family_sizes(df)
+    family_sizes = an_solution.return_family_sizes(initial_data)
 
     ## don't touch it is good to optimize the second metric mainly (once the proportion is set.
     # while choice_cost > 200000:
@@ -173,6 +183,7 @@ if __name__ == "__main__":
     #     accounting = accounting_new
     #     people_count = people_count_copy
 
+    # optimize for first metric (choice cost)
     iteration = 0
     while choice_cost > 200000 or iteration > 10000:
         new_exchange_found, new_exchange_found_days, new_cost, people_count_copy, accounting_new\
@@ -180,14 +191,14 @@ if __name__ == "__main__":
                                   family_choices_days,
                                   choice_cost,
                                   accounting,
-                                  people_count,
+                                  days_load,
                                   family_sizes,
-                                  df)
+                                  initial_data)
         family_choices_ids = new_exchange_found
         family_choices_days = new_exchange_found_days
         choice_cost = new_cost
         accounting = accounting_new
-        people_count = people_count_copy
+        days_load = people_count_copy
 
         data_load = santa.SantaDataLoad()
         data_load.save_submission('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/', family_choices_days)
