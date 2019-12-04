@@ -134,6 +134,7 @@ def plot_choice_cost(days_cost):
     ax = sns.barplot(x=newdf.index, y=np.concatenate(newdf.values))
     ax.set_ylim(0, 1.1 * 10000)
     plt.xlabel('Family Size', fontsize=14)
+    plt.xticks(range(0, 100, 5))
     plt.ylabel('Count', fontsize=14)
     plt.title('Family Size Distribution', fontsize=20)
     plt.show()
@@ -141,7 +142,25 @@ def plot_choice_cost(days_cost):
     return np.sum(days_cost)
 
 
-def get_accounting_cost(daily_occupancy):
+def plot_accounting_cost(days_cost):
+    days_cost = days_cost[1:]
+    print(" sum of all cost is :" + str(np.sum(days_cost)))
+    print(" min of all days cost is :" + str(np.min(days_cost)))
+    print(" max of all days cost is :" + str(np.max(days_cost)))
+    plt.figure(figsize=(34, 50))
+    newdf = pd.DataFrame(days_cost)
+    ax = sns.barplot(x=newdf.index, y=np.concatenate(newdf.values))
+    ax.set_ylim(0, 1.1 * 800)
+    plt.xlabel('day', fontsize=14)
+    plt.ylabel('cost', fontsize=14)
+    plt.xticks(range(0, 100, 5))
+    plt.title('Daily accounting Distribution', fontsize=20)
+    plt.show()
+
+    return np.sum(days_cost)
+
+
+def get_total_accounting_cost(daily_occupancy):
     # Calculate the accounting cost
     # The first day (day 100) is treated special
     daily_occupancy_fix = np.zeros(101)
@@ -164,20 +183,48 @@ def get_accounting_cost(daily_occupancy):
     return accounting_cost
 
 
+def get_accounting_cost_per_day(daily_occupancy):
+    # Calculate the accounting cost
+    # The first day (day 100) is treated special
+    daily_accounting_cost = np.zeros(101)
+    daily_occupancy_fix = np.zeros(101)
+    daily_occupancy_fix[100] = daily_occupancy[99]
+    for i in range(100):
+        daily_occupancy_fix[i] = daily_occupancy[i]
+
+    accounting_cost = (daily_occupancy_fix[days[0]] - 125.0) / 400.0 * daily_occupancy_fix[days[0]] ** (0.5)
+    # using the max function because the soft constraints might allow occupancy to dip below 125
+    accounting_cost = max(0, accounting_cost)
+
+    # Loop over the rest of the days, keeping track of previous count
+    yesterday_count = daily_occupancy_fix[days[0]]
+    for day in days[1:]:
+        today_count = daily_occupancy_fix[day]
+        diff = abs(today_count - yesterday_count)
+        accounting_cost += max(0, (daily_occupancy_fix[day] - 125.0) / 400.0 * daily_occupancy_fix[day] ** (0.5 + diff / 50.0))
+        daily_accounting_cost[day] = max(0, (daily_occupancy_fix[day] - 125.0) / 400.0 * daily_occupancy_fix[day] ** (0.5 + diff / 50.0))
+        yesterday_count = today_count
+
+    return daily_accounting_cost
+
+
 if __name__ == "__main__":
     initial_data = return_family_data()
 
     # solution = load_solution_data('submission_76101.80064847361.csv')
-    # solution = load_solution_data('submission_76101.75179796087.csv')
-    solution = load_solution_data('sample_submission_output0.csv')
+    solution = load_solution_data('submission_76101.75179796087.csv')
+    # solution = load_solution_data('sample_submission_output0.csv')
 
     #daily_load = plot_daily_load(compute_daily_load(solution, initial_data))
     daily_load = compute_daily_load(solution, initial_data)
 
-    #choice_cost = plot_choice_cost(get_choice_cost(solution, initial_data))
+    choice_cost = plot_choice_cost(get_choice_cost(solution, initial_data))
     choice_cost = np.sum(get_choice_cost(solution, initial_data))
 
-    accounting_cost = get_accounting_cost(daily_load)
+    accounting_cost = get_total_accounting_cost(daily_load)
+
+    acc_cost = get_accounting_cost_per_day(daily_load)
+    # plot_accounting_cost(acc_cost)
 
     print('accounting cost :' + str(accounting_cost))
     print('choice_cost :' + str(choice_cost))

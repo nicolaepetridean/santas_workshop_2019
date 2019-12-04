@@ -105,6 +105,7 @@ def search_for_move(family_choices_ids, family_choices_days, choice_cost, accoun
     new_accounting = 0
     new_people_count = None
     for family_id, choice in enumerate(family_choices_ids):
+        print('checking family : ' + str(family_id))
         if choice > 0:
             for choice_id in range(1, 10):
                 family_choices_ids_copy = family_choices_ids.copy()
@@ -123,7 +124,7 @@ def search_for_move(family_choices_ids, family_choices_days, choice_cost, accoun
                     day_new_ok = 125 <= people_count_copy[int(new_day)] <= 300
 
                     computed_cost = an_solution.get_choice_cost(family_choices_days_copy, df)
-                    accounting_new = an_solution.get_accounting_cost(people_count_copy)
+                    accounting_new = an_solution.get_total_accounting_cost(people_count_copy)
 
                     old_total_cost = np.sum(choice_cost) + accounting_old
                     new_total_cost = np.sum(computed_cost) + accounting_new
@@ -157,7 +158,7 @@ if __name__ == "__main__":
 
     days_load = an_solution.compute_daily_load(solution, initial_data)
 
-    accounting_cost = an_solution.get_accounting_cost(days_load)
+    accounting_cost = an_solution.get_total_accounting_cost(days_load)
     choice_cost = an_solution.get_choice_cost(solution, initial_data)
     family_choices_ids = an_solution.calculate_choice_id_per_family(solution, initial_data)
     family_choices_days = np.array(solution['assigned_day'])
