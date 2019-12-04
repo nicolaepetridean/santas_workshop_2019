@@ -228,22 +228,31 @@ if __name__ == "__main__":
 
     choices = calculate_choice_id_per_family(solution, initial_data)
 
-    row=0
+    row = 0
     while row<initial_data.shape[0]:
-        if initial_data.iloc[row,11] >= 6:
-            for choice in range(0,10):
-                day = initial_data.iloc[row, choice+1]
-                day_load = daily_load[int(day)]
-                assigned_choice = choices[row]
-                assigned_choice_day = daily_load[int(initial_data.iloc[row, int(assigned_choice + 1)])]
+        if initial_data.iloc[row, 11] >= 6:
+            for new_choice in range(0, 10):
+                future_day = initial_data.iloc[row, new_choice+1]
+                future_day_load = daily_load[int(future_day)]
+                current_choice = choices[row]
+                current_day = initial_data.iloc[row, int(current_choice+1)]
+                current_day_load = daily_load[int(current_day)]
 
-                if day_load<192 and choice<=3 and int(assigned_choice) != choice and assigned_choice_day > 294:
-                    if choice > assigned_choice and choice-assigned_choice < 2:
-                        print('family_id is: ' + str(row) + ' and day load is :' + str(day_load) + ' new choice is : '
-                              + str(choice) + ' , assigned choice is ' + str(assigned_choice))
-                        print('current day load is ' + str(assigned_choice_day))
-                        print('current day is ' + str(initial_data.iloc[row, int(assigned_choice + 1)]))
-                        print('new assigned day whould be : ' + str(day))
+                if future_day_load<192 and new_choice<=3 and int(current_choice) != new_choice and current_day_load > 294:
+                    if new_choice > current_choice and new_choice-current_choice < 2:
+                        print('family_id is: ' + str(row) + ' and current day load is :' + str(current_day_load) + ' new choice is : '
+                              + str(new_choice) + ' , assigned choice is ' + str(future_day))
+                        print('future day load is ' + str(future_day_load))
+                        print('current day is ' + str(current_day))
+
+                        sum_of_load_on_freed_day = 0
+                        test_row = 0
+                        while test_row < 5000:
+                            if initial_data.iloc[test_row, 1] == int(current_day):
+                                sum_of_load_on_freed_day += initial_data.iloc[test_row, 11]
+                            test_row += 1
+
+                        print("wish for freed day would be : " + str(sum_of_load_on_freed_day))
                         print('\n')
         row += 1
 

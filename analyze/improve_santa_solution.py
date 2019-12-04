@@ -161,7 +161,7 @@ def return_family_data():
 
 if __name__ == "__main__":
 
-    solution = an_solution.load_solution_data('submission_76101.75179796087.csv')
+    solution = an_solution.load_solution_data('submission_76101.test_out_local_minima.csv')
     initial_data = return_family_data()
 
     days_load = an_solution.compute_daily_load(solution, initial_data)
