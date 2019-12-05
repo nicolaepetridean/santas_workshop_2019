@@ -132,11 +132,11 @@ def plot_choice_cost(days_cost):
     plt.figure(figsize=(34, 50))
     newdf = pd.DataFrame(days_cost)
     ax = sns.barplot(x=newdf.index, y=np.concatenate(newdf.values))
-    ax.set_ylim(0, 1.1 * 10000)
+    ax.set_ylim(0, 1.1 * 5000)
     plt.xlabel('Family Size', fontsize=14)
     plt.xticks(range(0, 100, 5))
     plt.ylabel('Count', fontsize=14)
-    plt.title('Family Size Distribution', fontsize=20)
+    plt.title('Dayly Size Distribution', fontsize=20)
     plt.show()
 
     return np.sum(days_cost)
@@ -214,7 +214,7 @@ if __name__ == "__main__":
     # solution = load_solution_data('submission_76101.75179796087.csv')
     # solution = load_solution_data('submission_76101.test_out_local_minima.csv')
     # solution = load_solution_data('sample_submission_output_test.csv')
-    solution = load_solution_data('sample_submission_output22.csv')
+    solution = load_solution_data('sample_submission_output28.csv')
 
     #daily_load = plot_daily_load(compute_daily_load(solution, initial_data))
     daily_load = compute_daily_load(solution, initial_data)
