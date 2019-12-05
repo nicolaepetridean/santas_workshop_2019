@@ -67,4 +67,4 @@ if __name__ == "__main__":
     # print('optimal day load : ' + str(data_load.optimal_day_load()))
 
     data_load = SantaDataLoad()
-    data_load.fix_submission("/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/")
+    data_load.fix_submission("D:\\jde\\projects\\santas_workshop_2019\\santadata\\")

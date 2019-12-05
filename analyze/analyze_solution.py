@@ -1,11 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-import seaborn as sns
+# import seaborn as sns
 import analyze.load_santa_data as santa
 
 
-data = pd.read_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/family_data.csv', index_col='family_id')
+data = pd.read_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\family_data.csv', index_col='family_id')
 
 cols = [f'choice_{i}' for i in range(10)]
 choice_dict = data[cols].to_dict()
@@ -21,13 +21,13 @@ family_size_dict = data[['n_people']].to_dict()['n_people']
 
 def return_family_data():
     data_load = santa.SantaDataLoad()
-    df = data_load.load_family_initial_data("/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/")
+    df = data_load.load_family_initial_data("D:\\jde\\projects\\santas_workshop_2019\\santadata\\")
     return df
 
 
 def load_solution_data(solution_file = "sample_submission_output_fix.csv"):
     data_load = santa.SantaDataLoad()
-    df = data_load.load_solution_file("/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/" + solution_file)
+    df = data_load.load_solution_file("D:\\jde\\projects\\santas_workshop_2019\\santadata\\" + solution_file)
     return df
 
 
@@ -71,17 +71,17 @@ def compute_daily_load(solution, initial_data):
     return days_load
 
 
-def plot_daily_load(days_load):
-    plt.figure(figsize=(34, 50))
-    newdf = pd.DataFrame(days_load)
-    ax = sns.barplot(x=newdf.index, y=np.concatenate(newdf.values))
-    ax.set_ylim(0, 1.1 * 1000)
-    plt.xlabel('day', fontsize=14)
-    plt.ylabel('Count', fontsize=14)
-    plt.title('Day Load', fontsize=20)
-    plt.show()
-
-    return days_load
+# def plot_daily_load(days_load):
+#     plt.figure(figsize=(34, 50))
+#     newdf = pd.DataFrame(days_load)
+#     ax = sns.barplot(x=newdf.index, y=np.concatenate(newdf.values))
+#     ax.set_ylim(0, 1.1 * 1000)
+#     plt.xlabel('day', fontsize=14)
+#     plt.ylabel('Count', fontsize=14)
+#     plt.title('Day Load', fontsize=20)
+#     plt.show()
+#
+#     return days_load
 
 
 def calculate_choice_id_per_family(solution, initial_data):
@@ -124,40 +124,40 @@ def get_choice_cost(solution, initial_data):
     return days_cost
 
 
-def plot_choice_cost(days_cost):
-    days_cost = days_cost[1:]
-    print(" sum of all cost is :" + str(np.sum(days_cost)))
-    print(" min of all days cost is :" + str(np.min(days_cost)))
-    print(" max of all days cost is :" + str(np.max(days_cost)))
-    plt.figure(figsize=(34, 50))
-    newdf = pd.DataFrame(days_cost)
-    ax = sns.barplot(x=newdf.index, y=np.concatenate(newdf.values))
-    ax.set_ylim(0, 1.1 * 10000)
-    plt.xlabel('Family Size', fontsize=14)
-    plt.xticks(range(0, 100, 5))
-    plt.ylabel('Count', fontsize=14)
-    plt.title('Family Size Distribution', fontsize=20)
-    plt.show()
+# def plot_choice_cost(days_cost):
+#     days_cost = days_cost[1:]
+#     print(" sum of all cost is :" + str(np.sum(days_cost)))
+#     print(" min of all days cost is :" + str(np.min(days_cost)))
+#     print(" max of all days cost is :" + str(np.max(days_cost)))
+#     plt.figure(figsize=(34, 50))
+#     newdf = pd.DataFrame(days_cost)
+#     ax = sns.barplot(x=newdf.index, y=np.concatenate(newdf.values))
+#     ax.set_ylim(0, 1.1 * 10000)
+#     plt.xlabel('Family Size', fontsize=14)
+#     plt.xticks(range(0, 100, 5))
+#     plt.ylabel('Count', fontsize=14)
+#     plt.title('Family Size Distribution', fontsize=20)
+#     plt.show()
+#
+#     return np.sum(days_cost)
 
-    return np.sum(days_cost)
 
-
-def plot_accounting_cost(days_cost):
-    days_cost = days_cost[1:]
-    print(" sum of all cost is :" + str(np.sum(days_cost)))
-    print(" min of all days cost is :" + str(np.min(days_cost)))
-    print(" max of all days cost is :" + str(np.max(days_cost)))
-    plt.figure(figsize=(34, 50))
-    newdf = pd.DataFrame(days_cost)
-    ax = sns.barplot(x=newdf.index, y=np.concatenate(newdf.values))
-    ax.set_ylim(0, 1.1 * 800)
-    plt.xlabel('day', fontsize=14)
-    plt.ylabel('cost', fontsize=14)
-    plt.xticks(range(0, 100, 5))
-    plt.title('Daily accounting Distribution', fontsize=20)
-    plt.show()
-
-    return np.sum(days_cost)
+# def plot_accounting_cost(days_cost):
+#     days_cost = days_cost[1:]
+#     print(" sum of all cost is :" + str(np.sum(days_cost)))
+#     print(" min of all days cost is :" + str(np.min(days_cost)))
+#     print(" max of all days cost is :" + str(np.max(days_cost)))
+#     plt.figure(figsize=(34, 50))
+#     newdf = pd.DataFrame(days_cost)
+#     ax = sns.barplot(x=newdf.index, y=np.concatenate(newdf.values))
+#     ax.set_ylim(0, 1.1 * 800)
+#     plt.xlabel('day', fontsize=14)
+#     plt.ylabel('cost', fontsize=14)
+#     plt.xticks(range(0, 100, 5))
+#     plt.title('Daily accounting Distribution', fontsize=20)
+#     plt.show()
+#
+#     return np.sum(days_cost)
 
 
 def get_total_accounting_cost(daily_occupancy):
@@ -219,7 +219,7 @@ if __name__ == "__main__":
     #daily_load = plot_daily_load(compute_daily_load(solution, initial_data))
     daily_load = compute_daily_load(solution, initial_data)
 
-    choice_cost = plot_choice_cost(get_choice_cost(solution, initial_data))
+    #choice_cost = plot_choice_cost(get_choice_cost(solution, initial_data))
     choice_cost = np.sum(get_choice_cost(solution, initial_data))
 
     accounting_cost = get_total_accounting_cost(daily_load)
