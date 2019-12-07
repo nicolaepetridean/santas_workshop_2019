@@ -37,6 +37,6 @@ if __name__ == "__main__":
     data.submission['final'] = series
     final_data = data.submission.drop(['Survived', 'check'], axis=1)
     final_data = final_data.rename(columns={"final": "Survived"})
-    final_data.to_csv("/Users/nicolaepetridean/jde/projects/titanic/try/data/submission.csv", index = None, header=True)
+    final_data.to_csv("/Users/nicolaepetridean/jde/projects/titanic/try/data/submission_stochastic_75832_local.csv", index = None, header=True)
 
 

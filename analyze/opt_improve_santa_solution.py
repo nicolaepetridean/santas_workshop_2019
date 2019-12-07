@@ -172,6 +172,7 @@ def search_for_move(family_choices_ids, family_choices_days, choice_cost, accoun
                     new_cost = new_choice_cost
                     new_accounting = accounting_new
                     new_people_count = people_count_copy
+                    break
                 # else:
                     # print("fam id " + str(family_id) + ", choice cost is: " + str(np.sum(computed_cost)) +
                     #       " accounting cost is : " + str(accounting_new) + " trial choice_id is " + str(choice_id)
@@ -188,7 +189,7 @@ def return_family_data():
 
 if __name__ == "__main__":
 
-    solution = an_solution.load_solution_data('submission_76101.test_out_local_minima.csv')
+    solution = an_solution.load_solution_data('submission_72149_swap_stochastic_product.csv')
     initial_data = return_family_data()
 
     days_load = an_solution.compute_daily_load(solution, initial_data)
@@ -268,7 +269,7 @@ if __name__ == "__main__":
         family_choices_days = new_exchange_found_days
         choice_cost = new_cost
         accounting_cost = accounting_new
-        total_cost = np.sum(choice_cost) + accounting_cost
+        total_cost = choice_cost + accounting_cost
         days_load = people_count_copy
 
         print("Accounting cost is : " + str(accounting_cost))

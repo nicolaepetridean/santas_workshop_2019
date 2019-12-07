@@ -212,11 +212,15 @@ if __name__ == "__main__":
     initial_data = return_family_data()
 
     # solution = load_solution_data('submission_76101.80064847361.csv')
-    solution = load_solution_data('submission_76101.75179796087.csv')
-    # solution = load_solution_data('sample_submission_output_test.csv')
+    # solution = load_solution_data('submission_76101.75179796087.csv')
+    solution = load_solution_data('sample_submission_output55_76448_submit.csv')
+
+    print('total INITIAL cost would be' + str(np.sum(get_choice_cost(np.ndarray.flatten(np.array(solution)), initial_data))))
 
     #daily_load = plot_daily_load(compute_daily_load(solution, initial_data))
     daily_load = compute_daily_load(solution, initial_data)
+    acc_cost = get_total_accounting_cost(daily_load)
+    print('total acc cost would be' + str(acc_cost))
 
     #choice_cost = plot_choice_cost(get_choice_cost(solution, initial_data))
     #choice_cost = np.sum(get_choice_cost(solution, initial_data))
@@ -238,22 +242,30 @@ if __name__ == "__main__":
                 current_day = initial_data.iloc[row, int(current_choice+1)]
                 current_day_load = daily_load[int(current_day)]
 
-                if future_day_load<192 and new_choice<=3 and int(current_choice) != new_choice and current_day_load > 294:
-                    if new_choice > current_choice and new_choice-current_choice < 2:
-                        print('family_id is: ' + str(row) + ' and current day load is :' + str(current_day_load) + ' new choice is : '
-                              + str(new_choice) + ' , assigned choice is ' + str(future_day))
-                        print('future day load is ' + str(future_day_load))
-                        print('current day is ' + str(current_day))
+                if future_day_load<152 and new_choice<=3 and int(current_choice) != new_choice and current_day_load > 290:
+                    print('family_id is: ' + str(row) + ' and current day load is :' + str(current_day_load) + ' new choice is : '
+                          + str(new_choice) + ' , new day is ' + str(future_day) + ' old choice is: ' +str(current_choice) )
+                    print('future day load is ' + str(future_day_load))
+                    print('current day is ' + str(current_day))
 
-                        sum_of_load_on_freed_day = 0
-                        test_row = 0
-                        while test_row < 5000:
-                            if initial_data.iloc[test_row, 1] == int(current_day):
-                                sum_of_load_on_freed_day += initial_data.iloc[test_row, 11]
-                            test_row += 1
+                    sum_of_load_on_freed_day = 0
+                    test_row = 0
+                    while test_row < 5000:
+                        if initial_data.iloc[test_row, 1] == int(current_day):
+                            sum_of_load_on_freed_day += initial_data.iloc[test_row, 11]
+                        test_row += 1
 
-                        print("wish for freed day would be : " + str(sum_of_load_on_freed_day))
-                        print('\n')
+                    solution.iloc[row] = future_day
+
+                    daily_load = compute_daily_load(solution, initial_data)
+                    acc_cost = get_total_accounting_cost(daily_load)
+                    choice_cost = np.sum(get_choice_cost(np.ndarray.flatten(np.array(solution)), initial_data))
+
+                    print('total cost would be' + str(choice_cost))
+                    print('total accounting cost would be' + str(acc_cost))
+
+                    print("wish for freed day would be : " + str(sum_of_load_on_freed_day))
+                    print('\n')
         row += 1
 
 
