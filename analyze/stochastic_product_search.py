@@ -325,7 +325,7 @@ if __name__ == '__main__' :
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('submission_stochastic_75832_local.csv')
+    prediction = load_solution_data('submission_3_72040_stoch_prod_search.csv')
 
     prediction = prediction['assigned_day'].to_numpy()
 
@@ -348,14 +348,16 @@ if __name__ == '__main__' :
     fam_size_out = 7
     while fam_size_out > 2:
         final = stochastic_product_search(
-                top_k=2,
+                top_k=3,
                 fam_size=fam_size_out,
                 original=prediction,
-                n_iter=700000,
+                n_iter=500000,
                 verbose=1000,
-                verbose2=50000,
+                verbose2=10000,
                 random_state=2019
                 )
+
+        prediction = final
 
         sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
         sub['assigned_day'] = final + 1
