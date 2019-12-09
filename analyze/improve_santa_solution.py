@@ -112,7 +112,7 @@ def search_for_exchange(family_choices_ids, family_choices_days, choice_cost, ac
                             print('new_total_cost - old_total_cost : ' + str(new_total_cost - old_total_cost))
 
                     if ((new_total_cost < old_total_cost) and day_old_ok and day_new_ok and not should_accept_negatives) \
-                            or should_accept_negatives:
+                            or (should_accept_negatives and new_total_cost >= old_total_cost) :
                         print("BINGO, fam id " + str(family_id) + ", choice cost is: " + str(np.sum(new_choice_cost)) +
                               " accounting cost is : " + str(accounting_new))
                         new_exchange_found_ids = family_choices_ids_copy
@@ -164,7 +164,7 @@ def search_for_move(family_choices_ids, family_choices_days, choice_cost, accoun
                         should_accept_negatives = True
                     print ('new_total_cost - old_total_cost : ' + str(new_total_cost - old_total_cost))
                 if ((new_total_cost < old_total_cost) and day_old_ok and day_new_ok and should_accept_negatives is False) \
-                        or should_accept_negatives:
+                        or (should_accept_negatives and new_total_cost >= old_total_cost):
                     print("BINGO, fam id " + str(family_id) + ", choice cost is: " + str(np.sum(new_choice_cost)) +
                           " accounting cost is : " + str(accounting_new))
                     new_exchange_found_ids = family_choices_ids_copy
@@ -240,7 +240,7 @@ if __name__ == "__main__":
 
     # optimize for first metric (choice cost)
     iteration = 0
-    accept_threshold = 0
+    accept_threshold = 10
     while np.sum(choice_cost) > 69000 or iteration < 3:
         print('iteration index : ' + str(iteration))
         new_exchange_found, new_exchange_found_days, new_cost, people_count_copy, accounting_new\
