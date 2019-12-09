@@ -236,9 +236,11 @@ def stochastic_product_search(top_k, fam_size, original,
     best_score = cost_function(best)
 
     np.random.seed(random_state)
+    min_obtained_score = 100000
 
     for i in range(n_iter):
         fam_indices = np.random.choice(range(DESIRED.shape[0]), size=fam_size)
+        #fam_indices = np.append(fam_indices, [1415])
         changes = np.array(list(product(*DESIRED[fam_indices, :top_k].tolist())))
 
         for change in changes:
@@ -247,7 +249,10 @@ def stochastic_product_search(top_k, fam_size, original,
 
             new_score = cost_function(new)
 
-            if new_score < best_score:
+            if new_score < min_obtained_score:
+                min_obtained_score = new_score
+
+            if (new_score <= best_score) or (0 < best_score - new_score < 25):
                 best_score = new_score
                 best = new
 
@@ -256,6 +261,9 @@ def stochastic_product_search(top_k, fam_size, original,
 
         if verbose2 and i % verbose2 == 0:
             print(f"Iteration #{i}: Best score is {best_score:.2f}      ")
+            print(f"Iteration #{i}: new score is {new_score:.2f}      ")
+            print(f"Iteration #{i}: min score score is {min_obtained_score:.2f}      ")
+            print(f"Iteration #{i}: family indices are {str(fam_indices)}      ")
 
     print(f"Final best score is {best_score:.2f}")
     return best
@@ -325,7 +333,7 @@ if __name__ == '__main__' :
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('test_submission_stoc_71720_55_5.csv')
+    prediction = load_solution_data('test_submission_stoc_71720_55_5_8.csv')
 
     prediction = prediction['assigned_day'].to_numpy()
 
@@ -345,25 +353,24 @@ if __name__ == '__main__' :
 
     iteration = 1
 
-    fam_size_out = 8
-    n_iter = 800000
+    fam_size_out = 5
+    n_iter = 1000000
     while fam_size_out > 1:
         final = stochastic_product_search(
-                top_k=2,
+                top_k=4,
                 fam_size=fam_size_out,
                 original=prediction,
                 n_iter=n_iter,
                 verbose=100,
                 verbose2=500,
-                random_state=2019
+                random_state=2010
                 )
 
         prediction = final
-        n_iter -= 50000
 
         sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
         sub['assigned_day'] = final + 1
-        sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\test_submission_stoc_71720_55_5_' + str(fam_size_out) + '.csv', index=False)
+        sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\test_submission_stoc_71699_54_negative_82_' + str(fam_size_out) + '.csv', index=False)
 
         fam_size_out -= 1
 
