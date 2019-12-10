@@ -333,7 +333,7 @@ if __name__ == '__main__' :
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('test_submission_stoc_71720_55_5_8.csv')
+    prediction = load_solution_data('submission_stoc_71639.csv')
 
     prediction = prediction['assigned_day'].to_numpy()
 
