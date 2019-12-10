@@ -132,7 +132,7 @@ def search_for_move(family_choices_ids, family_choices_days, choice_cost, accoun
     new_people_count = people_count
     for family_id, choice in enumerate(new_exchange_found_ids):
         print('checking family : ' + str(family_id))
-        for choice_id in range(0, 10):
+        for choice_id in range(0, 6):
             family_choices_ids_copy = new_exchange_found_ids.copy()
             family_choices_days_copy = new_exchange_found_days.copy()
             people_count_copy = new_people_count.copy()
@@ -188,7 +188,7 @@ def return_family_data():
 
 if __name__ == "__main__":
 
-    solution = an_solution.load_solution_data('test_submission_stoc_TOP4_8_71720.csv')
+    solution = an_solution.load_solution_data('test_submission_stoc_71699_54_negative_82_3.csv')
     initial_data = return_family_data()
 
     days_load = an_solution.compute_daily_load(solution, initial_data)
@@ -240,7 +240,7 @@ if __name__ == "__main__":
 
     # optimize for first metric (choice cost)
     iteration = 0
-    accept_threshold = 10
+    accept_threshold = 0
     while np.sum(choice_cost) > 69000 or iteration < 3:
         print('iteration index : ' + str(iteration))
         new_exchange_found, new_exchange_found_days, new_cost, people_count_copy, accounting_new\

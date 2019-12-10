@@ -19,3 +19,5 @@ Every family must be scheduled for one and only one assigned_day
  -   try to improve a very costy choice/day with another day that has cost.
  -   in the random family schoice generator jump over the families already on choice one. just to try to get some progress.-
  -   iterate on stochastic 8/2, 9/2 8/3 vs 5,5, 4/5 etc
+ -   check on which days were made changes. to evaluate if amoung it are more or less the costy days. if so, check famillies
+    in the most costy days as part of the random array of choices.
