@@ -221,7 +221,7 @@ def findBetterDay4Family(pred):
     print(score)
 
 
-def stochastic_product_search(top_k, fam_size, original,
+def stochastic_product_search(top_k_jump, top_k, fam_size, original,
                               verbose=1000, verbose2=50000,
                               n_iter=500, random_state=2019):
     """
@@ -241,7 +241,7 @@ def stochastic_product_search(top_k, fam_size, original,
     for i in range(n_iter):
         fam_indices = np.random.choice(range(DESIRED.shape[0]), size=fam_size)
         #fam_indices = np.append(fam_indices, [1415])
-        changes = np.array(list(product(*DESIRED[fam_indices, :top_k].tolist())))
+        changes = np.array(list(product(*DESIRED[fam_indices, top_k_jump:top_k].tolist())))
 
         for change in changes:
             new = best.copy()
@@ -354,10 +354,11 @@ if __name__ == '__main__' :
     iteration = 1
 
     fam_size_out = 5
-    n_iter = 1000000
+    n_iter = 600000
     while fam_size_out > 1:
         final = stochastic_product_search(
-                top_k=4,
+                top_k_jump=0,
+                top_k=5,
                 fam_size=fam_size_out,
                 original=prediction,
                 n_iter=n_iter,
@@ -370,7 +371,7 @@ if __name__ == '__main__' :
 
         sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
         sub['assigned_day'] = final + 1
-        sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\test_submission_stoc_71699_54_negative_82_' + str(fam_size_out) + '.csv', index=False)
+        sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\submission_stoc_71639_jumptop0_55' + str(fam_size_out) + '.csv', index=False)
 
         fam_size_out -= 1
 
