@@ -333,7 +333,7 @@ if __name__ == '__main__' :
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('submission_stoc_71639.csv')
+    prediction = load_solution_data('submission_stoc_71613_jumptop0_828.csv')
 
     prediction = prediction['assigned_day'].to_numpy()
 
@@ -353,25 +353,25 @@ if __name__ == '__main__' :
 
     iteration = 1
 
-    fam_size_out = 5
-    n_iter = 600000
+    fam_size_out = 4
+    n_iter = 500000
     while fam_size_out > 1:
         final = stochastic_product_search(
                 top_k_jump=0,
-                top_k=5,
+                top_k=3,
                 fam_size=fam_size_out,
                 original=prediction,
                 n_iter=n_iter,
-                verbose=100,
-                verbose2=500,
-                random_state=2010
+                verbose=500,
+                verbose2=2500,
+                random_state=2019
                 )
 
         prediction = final
 
         sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
         sub['assigned_day'] = final + 1
-        sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\submission_stoc_71639_jumptop0_55' + str(fam_size_out) + '.csv', index=False)
+        sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\submission_stoc_71613_jumptop0_43' + str(fam_size_out) + '.csv', index=False)
 
         fam_size_out -= 1
 
