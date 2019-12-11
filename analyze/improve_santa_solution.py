@@ -188,7 +188,7 @@ def return_family_data():
 
 if __name__ == "__main__":
 
-    solution = an_solution.load_solution_data('test_submission_stoc_71699_54_negative_82_3.csv')
+    solution = an_solution.load_solution_data('submission_stoc_71561_BASE.csv')
     initial_data = return_family_data()
 
     days_load = an_solution.compute_daily_load(solution, initial_data)
@@ -201,42 +201,6 @@ if __name__ == "__main__":
     print("Accounting cost is : " + str(accounting_cost))
     print("choice cost is : " + str(np.sum(choice_cost)))
     family_sizes = an_solution.return_family_sizes(initial_data)
-
-    ## don't touch it is good to optimize the second metric mainly (once the proportion is set.
-    # iteration = 0
-    # accept_threshold = 0
-    # while np.sum(choice_cost) > 69000 or iteration < 3:
-    #     new_exchange_found, new_exchange_found_days, new_cost, people_count_copy, accounting_new\
-    #         = search_for_exchange(family_choices_ids,
-    #                             family_choices_days,
-    #                             choice_cost,
-    #                             accounting_cost,
-    #                             days_load,
-    #                             family_sizes,
-    #                             initial_data,
-    #                             accept_threshold)
-    #
-    #     if np.sum(choice_cost) == np.sum(new_cost):
-    #         if (accept_threshold == 0):
-    #             accept_threshold += 300
-    #         accept_threshold += 100
-    #     else:
-    #         iteration = 0
-    #         accept_threshold = 0
-    #         data_load = santa.SantaDataLoad()
-    #         all_cost = np.sum(new_cost) + accounting_new
-    #         data_load.save_submission('D:\\jde\\projects\\santas_workshop_2019\\santadata\\', str(all_cost),
-    #                                   new_exchange_found_days)
-    #     iteration += 1
-    #
-    #
-    #     family_choices_ids = new_exchange_found
-    #     family_choices_days = new_exchange_found_days
-    #     choice_cost = new_cost
-    #     accounting = accounting_new
-    #     total_cost = choice_cost + accounting_cost
-    #     people_count = people_count_copy
-
 
     # optimize for first metric (choice cost)
     iteration = 0

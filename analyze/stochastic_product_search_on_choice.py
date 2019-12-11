@@ -5,7 +5,7 @@ from numba import njit
 from itertools import product
 import matplotlib.pylab as plt
 from ortools.linear_solver import pywraplp
-from analyze.analyze_solution import load_solution_data, calculate_choice_id_per_family, return_family_data
+from analyze.analyze_solution import load_solution_data, calculate_choice_id_per_family, return_family_data, get_choice_cost
 
 def get_penalty(n, choice):
     penalty = None
@@ -253,12 +253,14 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
 
             new_score = cost_function(new)
 
-            if new_score < min_obtained_score:
-                min_obtained_score = new_score
-
-            if (new_score <= best_score) or (0 < best_score - new_score < 25):
+            if (new_score < best_score) or (0 < best_score - new_score < 25):
                 best_score = new_score
                 best = new
+                print("New best score found : " + str(best_score))
+                sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
+                sub['assigned_day'] = best + 1
+                sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\submission_stoc_71561_73_focus_' + str(
+                    fam_size+random_choices_nr) + '_iter_' + str(i) + '_score_' + str(best_score) + '.csv', index=False)
 
         if verbose and i % verbose == 0:
             print(f"Iteration #{i}: Best score is {best_score:.2f}      ", end='\r')
@@ -266,7 +268,6 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
         if verbose2 and i % verbose2 == 0:
             print(f"Iteration #{i}: Best score is {best_score:.2f}      ")
             print(f"Iteration #{i}: new score is {new_score:.2f}      ")
-            print(f"Iteration #{i}: min score score is {min_obtained_score:.2f}      ")
             print(f"Iteration #{i}: family indices are {str(fam_indices)}      ")
 
     print(f"Final best score is {best_score:.2f}")
@@ -337,7 +338,7 @@ if __name__ == '__main__' :
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('submission_stoc_71561_BASE_try.csv')
+    prediction = load_solution_data('submission_stoc_71561_BASE.csv')
 
     prediction = prediction['assigned_day'].to_numpy()
 
@@ -357,34 +358,31 @@ if __name__ == '__main__' :
 
     iteration = 1
 
-    fam_size_out = 6
-    n_iter = 150000
+    fam_size_out = 10
+    n_iter = 1200000
 
     initial_data = return_family_data()
     # solution = load_solution_data('submission_76101.75179796087.csv')
-    solution = load_solution_data('submission_stoc_71561_BASE_try.csv')
-    choice_ids = calculate_choice_id_per_family(solution, initial_data)
+    solution = load_solution_data('submission_stoc_71561_BASE.csv')
+    day = np.argmax(get_choice_cost(solution, initial_data))
+    famillies = np.array(solution.loc[solution['assigned_day'] == day].index.values.tolist())
 
     while fam_size_out > 1:
         # compute non zero choices
-        switch_candidates = [i for i, value in enumerate(choice_ids)  if value>0]
+        switch_candidates = famillies
         final = stochastic_product_search(
                 top_k_jump=0,
-                top_k=4,
+                top_k=2,
                 fam_size=fam_size_out,
                 original=prediction,
                 n_iter=n_iter,
                 verbose=1000,
                 verbose2=1000,
-                random_state=2019,
+                random_state=2021,
                 switch_candidates=switch_candidates
                 )
 
         prediction = final
-
-        sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
-        sub['assigned_day'] = final + 1
-        sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\submission_stoc_71561_7_exp_2_' + str(fam_size_out) + '.csv', index=False)
 
         fam_size_out -= 1
 

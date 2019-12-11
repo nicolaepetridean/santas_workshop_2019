@@ -213,7 +213,7 @@ if __name__ == "__main__":
 
     # solution = load_solution_data('submission_76101.80064847361.csv')
     # solution = load_solution_data('submission_76101.75179796087.csv')
-    solution = load_solution_data('sample_submission_output55_76448_submit.csv')
+    solution = load_solution_data('submission_stoc_71561_BASE.csv')
 
     print('total INITIAL cost would be' + str(np.sum(get_choice_cost(np.ndarray.flatten(np.array(solution)), initial_data))))
 
