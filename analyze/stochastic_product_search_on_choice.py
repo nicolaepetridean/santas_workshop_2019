@@ -112,7 +112,7 @@ def cost_stats(prediction):
 def cost_function(prediction):
     penalty, daily_occupancy = pcost(prediction)
     accounting_cost, n_out_of_range = acost(daily_occupancy)
-    return penalty + accounting_cost + n_out_of_range*100000000
+    return penalty + n_out_of_range*100000000, accounting_cost
 
 
 # fixMinOccupancy, fixMaxOccupancy + helpers
@@ -201,7 +201,8 @@ def fixMinOccupancy(prediction):
 
 def findBetterDay4Family(pred):
     fobs = np.argsort(FAMILY_SIZE)
-    score = cost_function(pred)
+    (init_choice_cost, init_accounting_cost) = cost_function(pred)
+    score = init_choice_cost + init_accounting_cost
     original_score = np.inf
 
     while original_score > score:
@@ -211,7 +212,8 @@ def findBetterDay4Family(pred):
                 day = DESIRED[family_id, pick]
                 oldvalue = pred[family_id]
                 pred[family_id] = day
-                new_score = cost_function(pred)
+                (choice_cost, accounting_cost) = cost_function(pred)
+                new_score = choice_cost + accounting_cost
                 if new_score < score:
                     score = new_score
                 else:
@@ -233,34 +235,55 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
     """
 
     best = original.copy()
-    best_score = cost_function(best)
+    (best_choice_cost, best_accounting_cost) = cost_function(best)
+    best_score = best_choice_cost + best_accounting_cost
+    initial_score = best_score
 
     np.random.seed(random_state)
     min_obtained_score = 100000
 
     random_choices_nr = 1 #np.minimum(int(fam_size/2), 2)
-    fam_size = fam_size - random_choices_nr
+    #fam_size = fam_size - random_choices_nr
+    last_switch = 0
 
     for i in range(n_iter):
+        last_switch += 1
         fam_indices = np.random.choice(range(DESIRED.shape[0]), size=fam_size)
-        rand_fam_indices = np.random.choice(switch_candidates, size=random_choices_nr)
-        fam_indices = np.append(fam_indices, rand_fam_indices)
+        #rand_fam_indices = np.random.choice(switch_candidates, size=random_choices_nr)
+        #fam_indices = np.append(fam_indices, rand_fam_indices)
         changes = np.array(list(product(*DESIRED[fam_indices, top_k_jump:top_k].tolist())))
 
         for change in changes:
             new = best.copy()
             new[fam_indices] = change
 
-            new_score = cost_function(new)
+            (new_choice_cost, new_accounting_cost) = cost_function(new)
+            new_score = new_choice_cost + new_accounting_cost
 
-            if (new_score < best_score) or (0 < best_score - new_score < 25):
+            if new_score < best_score:
                 best_score = new_score
                 best = new
+                best_choice_cost = new_choice_cost
+                best_accounting_cost = new_accounting_cost
+                last_switch = 0
                 print("New best score found : " + str(best_score))
-                sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
-                sub['assigned_day'] = best + 1
-                sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\submission_stoc_71561_73_focus_' + str(
-                    fam_size+random_choices_nr) + '_iter_' + str(i) + '_score_' + str(best_score) + '.csv', index=False)
+
+                if best_score<initial_score:
+                    sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
+                    sub['assigned_day'] = best + 1
+                    sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\submission_stoc_71561_73_JUMP_' + str(
+                        fam_size+random_choices_nr) + '_iter_' + str(i) + '_score_' + str(best_score) + '.csv', index=False)
+
+            else:
+                if last_switch > 50000:
+                    if 40 < new_score - best_score < 100:
+                        best_score = new_score
+                        best = new
+                        best_choice_cost = new_choice_cost
+                        best_accounting_cost = new_accounting_cost
+                        print("JUMP. New best score found : " + str(best_score))
+                        last_switch = 0
+
 
         if verbose and i % verbose == 0:
             print(f"Iteration #{i}: Best score is {best_score:.2f}      ", end='\r')
@@ -338,7 +361,7 @@ if __name__ == '__main__' :
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('submission_stoc_71561_BASE.csv')
+    prediction = load_solution_data('submission_stoc_71561_73_JUMP_5_iter_27119_score_71660.49805314648.csv')
 
     prediction = prediction['assigned_day'].to_numpy()
 
@@ -358,12 +381,12 @@ if __name__ == '__main__' :
 
     iteration = 1
 
-    fam_size_out = 10
-    n_iter = 1200000
+    fam_size_out = 4
+    n_iter = 4000000
 
     initial_data = return_family_data()
     # solution = load_solution_data('submission_76101.75179796087.csv')
-    solution = load_solution_data('submission_stoc_71561_BASE.csv')
+    solution = load_solution_data('submission_stoc_71561_73_JUMP_5_iter_27119_score_71660.49805314648.csv')
     day = np.argmax(get_choice_cost(solution, initial_data))
     famillies = np.array(solution.loc[solution['assigned_day'] == day].index.values.tolist())
 
@@ -372,7 +395,7 @@ if __name__ == '__main__' :
         switch_candidates = famillies
         final = stochastic_product_search(
                 top_k_jump=0,
-                top_k=2,
+                top_k=3,
                 fam_size=fam_size_out,
                 original=prediction,
                 n_iter=n_iter,

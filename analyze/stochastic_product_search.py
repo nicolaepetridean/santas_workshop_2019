@@ -337,7 +337,7 @@ if __name__ == '__main__' :
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('submission_stoc_71561_BASE_try.csv')
+    prediction = load_solution_data('submission_stoc_71561_73_JUMP_5_iter_1948489_score_71761.13146306177.csv')
 
     prediction = prediction['assigned_day'].to_numpy()
 
@@ -357,12 +357,12 @@ if __name__ == '__main__' :
 
     iteration = 1
 
-    fam_size_out = 6
+    fam_size_out = 8
     n_iter = 150000
 
     initial_data = return_family_data()
     # solution = load_solution_data('submission_76101.75179796087.csv')
-    solution = load_solution_data('submission_stoc_71561_BASE_try.csv')
+    solution = load_solution_data('submission_stoc_71561_73_JUMP_5_iter_1948489_score_71761.13146306177.csv')
     choice_ids = calculate_choice_id_per_family(solution, initial_data)
 
     while fam_size_out > 1:
@@ -370,7 +370,7 @@ if __name__ == '__main__' :
         switch_candidates = [i for i, value in enumerate(choice_ids)  if value>0]
         final = stochastic_product_search(
                 top_k_jump=0,
-                top_k=4,
+                top_k=2,
                 fam_size=fam_size_out,
                 original=prediction,
                 n_iter=n_iter,
