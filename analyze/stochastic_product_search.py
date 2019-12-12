@@ -337,7 +337,7 @@ if __name__ == '__main__' :
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('submission_stoc_71561_73_JUMP_5_iter_1948489_score_71761.13146306177.csv')
+    prediction = load_solution_data('submission_stoc_71423.17_BASE.csv')
 
     prediction = prediction['assigned_day'].to_numpy()
 
@@ -362,7 +362,7 @@ if __name__ == '__main__' :
 
     initial_data = return_family_data()
     # solution = load_solution_data('submission_76101.75179796087.csv')
-    solution = load_solution_data('submission_stoc_71561_73_JUMP_5_iter_1948489_score_71761.13146306177.csv')
+    solution = load_solution_data('submission_stoc_71423.17_BASE.csv')
     choice_ids = calculate_choice_id_per_family(solution, initial_data)
 
     while fam_size_out > 1:

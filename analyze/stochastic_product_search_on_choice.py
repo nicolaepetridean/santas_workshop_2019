@@ -244,7 +244,10 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
 
     random_choices_nr = 1 #np.minimum(int(fam_size/2), 2)
     #fam_size = fam_size - random_choices_nr
-    last_switch = 48000
+    last_switch = 39000
+
+    lower_bound = 70
+    upper_bound = 190
 
     for i in range(n_iter):
         last_switch += 1
@@ -260,7 +263,7 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
             (new_choice_cost, new_accounting_cost) = cost_function(new)
             new_score = new_choice_cost + new_accounting_cost
 
-            if new_score < best_score:
+            if new_score < best_score and (71427.5 < new_score or new_score < 71427):
                 best_score = new_score
                 best = new
                 best_choice_cost = new_choice_cost
@@ -268,15 +271,15 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
                 last_switch = 0
                 print("New best score found : " + str(best_score))
 
-                if best_score<initial_score:
+                if best_score < initial_score:
                     sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
                     sub['assigned_day'] = best + 1
                     sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\new\\submission_stoc_71478_53_JUMP_' + str(
                         fam_size+random_choices_nr) + '_iter_' + str(i) + '_score_' + str(best_score) + '_.csv', index=False)
 
             else:
-                if last_switch > 50000:
-                    if 90 < new_score - best_score < 150:
+                if last_switch > 90000:
+                    if lower_bound < new_score - best_score < upper_bound:
                         best_score = new_score
                         best = new
                         best_choice_cost = new_choice_cost
@@ -361,7 +364,7 @@ if __name__ == '__main__' :
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('submission_stoc_71478_BASE.csv')
+    prediction = load_solution_data('submission_stoc_71420.60_BASE.csv')
 
     prediction = prediction['assigned_day'].to_numpy()
 
@@ -381,12 +384,12 @@ if __name__ == '__main__' :
 
     iteration = 1
 
-    fam_size_out = 5
-    n_iter = 4000000
+    fam_size_out = 3
+    n_iter = 10000000
 
     initial_data = return_family_data()
     # solution = load_solution_data('submission_76101.75179796087.csv')
-    solution = load_solution_data('submission_stoc_71478_BASE.csv')
+    solution = load_solution_data('submission_stoc_71420.60_BASE.csv')
     day = np.argmax(get_choice_cost(solution, initial_data))
     famillies = np.array(solution.loc[solution['assigned_day'] == day].index.values.tolist())
 
@@ -401,7 +404,7 @@ if __name__ == '__main__' :
                 n_iter=n_iter,
                 verbose=1000,
                 verbose2=1000,
-                random_state=2021,
+                random_state=2019,
                 switch_candidates=switch_candidates
                 )
 
