@@ -244,10 +244,10 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
 
     random_choices_nr = 1 #np.minimum(int(fam_size/2), 2)
     #fam_size = fam_size - random_choices_nr
-    last_switch = 39000
+    last_switch = 0
 
-    lower_bound = 70
-    upper_bound = 190
+    lower_bound = 55
+    upper_bound = 140
 
     for i in range(n_iter):
         last_switch += 1
@@ -263,7 +263,7 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
             (new_choice_cost, new_accounting_cost) = cost_function(new)
             new_score = new_choice_cost + new_accounting_cost
 
-            if new_score < best_score and (71427.5 < new_score or new_score < 71427):
+            if new_score < best_score:
                 best_score = new_score
                 best = new
                 best_choice_cost = new_choice_cost
@@ -364,7 +364,7 @@ if __name__ == '__main__' :
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('submission_stoc_71420.60_BASE.csv')
+    prediction = load_solution_data('submission_stoc_71418.67_BASE.csv')
 
     prediction = prediction['assigned_day'].to_numpy()
 
@@ -389,7 +389,7 @@ if __name__ == '__main__' :
 
     initial_data = return_family_data()
     # solution = load_solution_data('submission_76101.75179796087.csv')
-    solution = load_solution_data('submission_stoc_71420.60_BASE.csv')
+    solution = load_solution_data('submission_stoc_71418.67_BASE.csv')
     day = np.argmax(get_choice_cost(solution, initial_data))
     famillies = np.array(solution.loc[solution['assigned_day'] == day].index.values.tolist())
 
@@ -398,7 +398,7 @@ if __name__ == '__main__' :
         switch_candidates = famillies
         final = stochastic_product_search(
                 top_k_jump=0,
-                top_k=3,
+                top_k=4,
                 fam_size=fam_size_out,
                 original=prediction,
                 n_iter=n_iter,
