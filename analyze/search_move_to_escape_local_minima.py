@@ -213,7 +213,7 @@ if __name__ == "__main__":
 
     # solution = load_solution_data('submission_76101.80064847361.csv')
     # solution = load_solution_data('submission_76101.75179796087.csv')
-    solution = load_solution_data('submission_stoc_71561_BASE.csv')
+    solution = load_solution_data('new\submission_mixed_5_iter_23076_score_71442.45747120796_.csv')
 
     print('total INITIAL cost would be' + str(np.sum(get_choice_cost(np.ndarray.flatten(np.array(solution)), initial_data))))
 
@@ -234,7 +234,7 @@ if __name__ == "__main__":
 
     row = 0
     while row<initial_data.shape[0]:
-        if initial_data.iloc[row, 11] >= 6:
+        if initial_data.iloc[row, 11] > 6:
             for new_choice in range(0, 10):
                 future_day = initial_data.iloc[row, new_choice+1]
                 future_day_load = daily_load[int(future_day)]
@@ -242,7 +242,7 @@ if __name__ == "__main__":
                 current_day = initial_data.iloc[row, int(current_choice+1)]
                 current_day_load = daily_load[int(current_day)]
 
-                if future_day_load<152 and new_choice<=3 and int(current_choice) != new_choice and current_day_load > 290:
+                if future_day_load<152 and new_choice<=3 and int(current_choice) == 0 and current_day_load > 290:
                     print('family_id is: ' + str(row) + ' and current day load is :' + str(current_day_load) + ' new choice is : '
                           + str(new_choice) + ' , new day is ' + str(future_day) + ' old choice is: ' +str(current_choice) )
                     print('future day load is ' + str(future_day_load))
