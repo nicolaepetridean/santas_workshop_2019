@@ -241,8 +241,6 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
 
     np.random.seed(random_state)
     min_obtained_score = 100000
-
-    random_choices_nr = 1 #np.minimum(int(fam_size/2), 2)
     last_switch = 0
 
     lower_bound = 30
@@ -252,8 +250,6 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
         last_switch += 1
 
         fam_indices = np.random.choice(range(DESIRED.shape[0]), size=fam_size)
-        #rand_fam_indices = np.random.choice(switch_candidates, size=random_choices_nr)
-        #fam_indices = np.append(fam_indices, rand_fam_indices)
         changes = np.array(list(product(*DESIRED[fam_indices, top_k_jump:top_k].tolist())))
 
         for change in changes:
@@ -274,21 +270,21 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
                 last_switch = 0
                 print("New best score found : " + str(best_score))
 
-                if best_score < initial_score:
+                if best_score < 71493:
                     sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
                     sub['assigned_day'] = best + 1
                     sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\new\\submission_mixed_' + str(
-                        fam_size+random_choices_nr) + '_iter_' + str(i) + '_score_' + str(best_score) + '_.csv', index=False)
+                        fam_size) + '_iter_' + str(i) + '_score_' + str(best_score) + '_.csv', index=False)
 
-            # else:
-            #     if last_switch > 19000:
-            #         if lower_bound < new_score - best_score < upper_bound:
-            #                 best_score = new_score
-            #                 best = new
-            #                 best_choice_cost = new_choice_cost
-            #                 best_accounting_cost = new_accounting_cost
-            #                 print("JUMP. New best score found : " + str(best_score))
-            #                 last_switch = 0
+            else:
+                if last_switch > 49000:
+                    if lower_bound < new_score - best_score < upper_bound:
+                            best_score = new_score
+                            best = new
+                            best_choice_cost = new_choice_cost
+                            best_accounting_cost = new_accounting_cost
+                            print("JUMP. New best score found : " + str(best_score))
+                            last_switch = 0
 
 
         if verbose and i % verbose == 0:
@@ -365,11 +361,11 @@ if __name__ == '__main__' :
     data = pd.read_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\family_data.csv', index_col='family_id')
 
     FAMILY_SIZE = data.n_people.values
-    DESIRED     = data.values[:, :-1] - 1 #data[data.n_people < 7].values[:, :-1] - 1
+    DESIRED     = data[data.n_people < 7].values[:, :-1] - 1 #data[data.n_people < 7].values[:, :-1] - 1
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('submission_71393.75_BASE.csv')
+    prediction = load_solution_data('new\\try_mixed_.csv')
 
     # for item in range(prediction.shape[0]):
     #     daily_load = compute_daily_load(prediction, data)
@@ -392,7 +388,7 @@ if __name__ == '__main__' :
 
     iteration = 1
 
-    fam_size_out = 14
+    fam_size_out = 4
     n_iter = 8000000
 
     initial_data = return_family_data()
@@ -402,7 +398,7 @@ if __name__ == '__main__' :
         #switch_candidates = famillies
         final = stochastic_product_search(
                 top_k_jump=0,
-                top_k=2,
+                top_k=3,
                 fam_size=fam_size_out,
                 original=prediction,
                 n_iter=n_iter,

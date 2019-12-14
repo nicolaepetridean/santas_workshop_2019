@@ -197,7 +197,7 @@ if __name__ == "__main__":
     initial_data = return_family_data()
 
     # solution = load_solution_data('submission_76101.75179796087.csv')
-    solution = load_solution_data('submission_71393.75_BASE.csv')
+    solution = load_solution_data('new\\try_mixed_.csv')
     # solution = load_solution_data('sample_submission_output_test.csv')
     # solution = load_solution_data('sample_submission_output55_76448_submit.csv')
 
