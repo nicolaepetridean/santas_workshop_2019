@@ -5,7 +5,7 @@ from numba import njit
 from itertools import product
 import matplotlib.pylab as plt
 from ortools.linear_solver import pywraplp
-from analyze.analyze_solution import load_solution_data, calculate_choice_id_per_family, return_family_data, get_choice_cost
+from analyze.analyze_solution import load_solution_data, calculate_choice_id_per_family, return_family_data, get_choice_cost, compute_daily_load
 
 def get_penalty(n, choice):
     penalty = None
@@ -246,7 +246,7 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
     last_switch = 0
 
     lower_bound = 30
-    upper_bound = 130
+    upper_bound = 80
 
     for i in range(n_iter):
         last_switch += 1
@@ -263,6 +263,9 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
             (new_choice_cost, new_accounting_cost) = cost_function(new)
             new_score = new_choice_cost + new_accounting_cost
 
+            if (new_score < min_obtained_score):
+                min_obtained_score = new_score
+
             if new_score < best_score:
                 best_score = new_score
                 best = new
@@ -271,21 +274,21 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
                 last_switch = 0
                 print("New best score found : " + str(best_score))
 
-                if best_score < initial_score :
+                if best_score < initial_score:
                     sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
                     sub['assigned_day'] = best + 1
                     sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\new\\submission_mixed_' + str(
                         fam_size+random_choices_nr) + '_iter_' + str(i) + '_score_' + str(best_score) + '_.csv', index=False)
 
-            else:
-                if last_switch > 19000:
-                    if lower_bound < new_score - best_score < upper_bound:
-                            best_score = new_score
-                            best = new
-                            best_choice_cost = new_choice_cost
-                            best_accounting_cost = new_accounting_cost
-                            print("JUMP. New best score found : " + str(best_score))
-                            last_switch = 0
+            # else:
+            #     if last_switch > 19000:
+            #         if lower_bound < new_score - best_score < upper_bound:
+            #                 best_score = new_score
+            #                 best = new
+            #                 best_choice_cost = new_choice_cost
+            #                 best_accounting_cost = new_accounting_cost
+            #                 print("JUMP. New best score found : " + str(best_score))
+            #                 last_switch = 0
 
 
         if verbose and i % verbose == 0:
@@ -293,8 +296,10 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
 
         if verbose2 and i % verbose2 == 0:
             print(f"Iteration #{i}: Best score is {best_score:.2f}      ")
+            print(f"Iteration #{i}: Best iteration score is {min_obtained_score:.2f}      ")
             print(f"Iteration #{i}: new score is {new_score:.2f}      ")
             print(f"Iteration #{i}: family indices are {str(fam_indices)}      ")
+            min_obtained_score = 100000
 
     print(f"Final best score is {best_score:.2f}")
     return best
@@ -354,60 +359,57 @@ def solveSantaLP():
 if __name__ == '__main__' :
     N_DAYS = 100
     N_FAMILIES = 5000
-    MAX_OCCUPANCY = 300
+    MAX_OCCUPANCY = 308
     MIN_OCCUPANCY = 125
 
     data = pd.read_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\family_data.csv', index_col='family_id')
 
     FAMILY_SIZE = data.n_people.values
-    DESIRED     = data[data.n_people<7].values[:, :-1] - 1
+    DESIRED     = data.values[:, :-1] - 1 #data[data.n_people < 7].values[:, :-1] - 1
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('submission_71393.75_BASE_try_3092.csv')
+    prediction = load_solution_data('submission_71393.75_BASE.csv')
+
+    # for item in range(prediction.shape[0]):
+    #     daily_load = compute_daily_load(prediction, data)
+    #     assigned_day = prediction[item]
+    #     ch0 = data.iloc[item, 1]
+    #     if data.iloc[item, 11] > 6 & assigned_day == ch0:
+    #         if daily_load[ch0] > 290:
+    #             for new_choice in range(3):
+    #                 if daily_load['ch' + str(new_choice+1)] < 270:
+    #                     not_moved = False
+    #                     prediction[item] = data.iloc[item, new_choice + 2]
+    #                     print('moved : ' + str(item) + ' to choice ' + str(new_choice+1) + ', day : ' + data.iloc[item, new_choice + 2])
+
 
     prediction = prediction['assigned_day'].to_numpy()
 
-    # prediction = solveSantaLP()
-    # penalty, accounting_cost, n_out_of_range, occupancy = cost_stats(prediction)
-    # print(penalty.sum(), accounting_cost.sum(), n_out_of_range, occupancy.min(), occupancy.max())
-    # #
-    # penalty, accounting_cost, n_out_of_range, occupancy = cost_stats(prediction)
-    # print(penalty.sum(), accounting_cost.sum(), n_out_of_range, occupancy.min(), occupancy.max())
-    #
-    #
-    # fixMinOccupancy(prediction)
-    # fixMaxOccupancy(prediction)
     prediction = prediction - 1
     penalty, accounting_cost, n_out_of_range, occupancy = cost_stats(prediction)
     print('{}, {:.0f}'.format(penalty.sum(), accounting_cost.sum()))
 
     iteration = 1
 
-    fam_size_out = 8
-    n_iter = 5000000
+    fam_size_out = 14
+    n_iter = 8000000
 
     initial_data = return_family_data()
-    # solution = load_solution_data('submission_76101.75179796087.csv')
-    solution = load_solution_data('submission_71393.75_BASE_try_3092.csv')
-    day = np.argmax(get_choice_cost(solution, initial_data))
-    #famillies = np.array(solution.loc[solution['assigned_day'] == day].index.values.tolist())
-    choice_ids = calculate_choice_id_per_family(solution, initial_data)
-    switch_candidates = [i for i, value in enumerate(choice_ids) if value > 0]
 
     while fam_size_out > 1:
         # compute non zero choices
         #switch_candidates = famillies
         final = stochastic_product_search(
-                top_k_jump=1,
-                top_k=3,
+                top_k_jump=0,
+                top_k=2,
                 fam_size=fam_size_out,
                 original=prediction,
                 n_iter=n_iter,
                 verbose=1000,
                 verbose2=1000,
                 random_state=2023,
-                switch_candidates=switch_candidates,
+                switch_candidates=[],
                 initial_data = initial_data
                 )
 

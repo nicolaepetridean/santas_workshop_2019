@@ -71,19 +71,6 @@ def compute_daily_load(solution, initial_data):
     return days_load
 
 
-# def plot_daily_load(days_load):
-#     plt.figure(figsize=(34, 50))
-#     newdf = pd.DataFrame(days_load)
-#     ax = sns.barplot(x=newdf.index, y=np.concatenate(newdf.values))
-#     ax.set_ylim(0, 1.1 * 1000)
-#     plt.xlabel('day', fontsize=14)
-#     plt.ylabel('Count', fontsize=14)
-#     plt.title('Day Load', fontsize=20)
-#     plt.show()
-#
-#     return days_load
-
-
 def calculate_choice_id_per_family(solution, initial_data):
     family_choice_ids = np.zeros(5000)
     row = 0
@@ -122,42 +109,6 @@ def get_choice_cost(solution, initial_data):
         row += 1
 
     return days_cost
-
-
-# def plot_choice_cost(days_cost):
-#     days_cost = days_cost[1:]
-#     print(" sum of all cost is :" + str(np.sum(days_cost)))
-#     print(" min of all days cost is :" + str(np.min(days_cost)))
-#     print(" max of all days cost is :" + str(np.max(days_cost)))
-#     plt.figure(figsize=(34, 50))
-#     newdf = pd.DataFrame(days_cost)
-#     ax = sns.barplot(x=newdf.index, y=np.concatenate(newdf.values))
-#     ax.set_ylim(0, 1.1 * 10000)
-#     plt.xlabel('Family Size', fontsize=14)
-#     plt.xticks(range(0, 100, 5))
-#     plt.ylabel('Count', fontsize=14)
-#     plt.title('Family Size Distribution', fontsize=20)
-#     plt.show()
-#
-#     return np.sum(days_cost)
-
-
-# def plot_accounting_cost(days_cost):
-#     days_cost = days_cost[1:]
-#     print(" sum of all cost is :" + str(np.sum(days_cost)))
-#     print(" min of all days cost is :" + str(np.min(days_cost)))
-#     print(" max of all days cost is :" + str(np.max(days_cost)))
-#     plt.figure(figsize=(34, 50))
-#     newdf = pd.DataFrame(days_cost)
-#     ax = sns.barplot(x=newdf.index, y=np.concatenate(newdf.values))
-#     ax.set_ylim(0, 1.1 * 800)
-#     plt.xlabel('day', fontsize=14)
-#     plt.ylabel('cost', fontsize=14)
-#     plt.xticks(range(0, 100, 5))
-#     plt.title('Daily accounting Distribution', fontsize=20)
-#     plt.show()
-#
-#     return np.sum(days_cost)
 
 
 def get_total_accounting_cost(daily_occupancy):
@@ -211,29 +162,18 @@ def get_accounting_cost_per_day(daily_occupancy):
 if __name__ == "__main__":
     initial_data = return_family_data()
 
-    # solution = load_solution_data('submission_76101.80064847361.csv')
-    # solution = load_solution_data('submission_76101.75179796087.csv')
     solution = load_solution_data('new\submission_mixed_5_iter_23076_score_71442.45747120796_.csv')
 
     print('total INITIAL cost would be' + str(np.sum(get_choice_cost(np.ndarray.flatten(np.array(solution)), initial_data))))
 
-    #daily_load = plot_daily_load(compute_daily_load(solution, initial_data))
     daily_load = compute_daily_load(solution, initial_data)
     acc_cost = get_total_accounting_cost(daily_load)
     print('total acc cost would be' + str(acc_cost))
 
-    #choice_cost = plot_choice_cost(get_choice_cost(solution, initial_data))
-    #choice_cost = np.sum(get_choice_cost(solution, initial_data))
-
-    #accounting_cost = get_total_accounting_cost(daily_load)
-
-    #acc_cost = get_accounting_cost_per_day(daily_load)
-    # plot_accounting_cost(acc_cost)
-
     choices = calculate_choice_id_per_family(solution, initial_data)
 
     row = 0
-    while row<initial_data.shape[0]:
+    while row < initial_data.shape[0]:
         if initial_data.iloc[row, 11] > 6:
             for new_choice in range(0, 10):
                 future_day = initial_data.iloc[row, new_choice+1]

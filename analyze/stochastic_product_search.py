@@ -239,12 +239,12 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
     min_obtained_score = 100000
 
     random_choices_nr = 1 #np.minimum(int(fam_size/2), 2)
-    fam_size = fam_size - random_choices_nr
+    #fam_size = fam_size - random_choices_nr
 
     for i in range(n_iter):
         fam_indices = np.random.choice(range(DESIRED.shape[0]), size=fam_size)
-        rand_fam_indices = np.random.choice(switch_candidates, size=random_choices_nr)
-        fam_indices = np.append(fam_indices, rand_fam_indices)
+        #rand_fam_indices = np.random.choice(switch_candidates, size=random_choices_nr)
+        #fam_indices = np.append(fam_indices, rand_fam_indices)
         changes = np.array(list(product(*DESIRED[fam_indices, top_k_jump:top_k].tolist())))
 
         for change in changes:
@@ -337,7 +337,7 @@ if __name__ == '__main__' :
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('submission_stoc_71423.17_BASE.csv')
+    prediction = load_solution_data('submission_71393.75_BASE.csv')
 
     prediction = prediction['assigned_day'].to_numpy()
 
@@ -357,12 +357,12 @@ if __name__ == '__main__' :
 
     iteration = 1
 
-    fam_size_out = 8
-    n_iter = 150000
+    fam_size_out = 6
+    n_iter = 800000
 
     initial_data = return_family_data()
     # solution = load_solution_data('submission_76101.75179796087.csv')
-    solution = load_solution_data('submission_stoc_71423.17_BASE.csv')
+    solution = load_solution_data('submission_71393.75_BASE.csv')
     choice_ids = calculate_choice_id_per_family(solution, initial_data)
 
     while fam_size_out > 1:
@@ -370,13 +370,13 @@ if __name__ == '__main__' :
         switch_candidates = [i for i, value in enumerate(choice_ids)  if value>0]
         final = stochastic_product_search(
                 top_k_jump=0,
-                top_k=2,
+                top_k=4,
                 fam_size=fam_size_out,
                 original=prediction,
                 n_iter=n_iter,
                 verbose=1000,
                 verbose2=1000,
-                random_state=2019,
+                random_state=2017,
                 switch_candidates=switch_candidates
                 )
 
@@ -384,27 +384,6 @@ if __name__ == '__main__' :
 
         sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
         sub['assigned_day'] = final + 1
-        sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\submission_stoc_71561_7_exp_2_' + str(fam_size_out) + '.csv', index=False)
+        sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\submission_pdsc_64_' + str(fam_size_out) + '.csv', index=False)
 
         fam_size_out -= 1
-
-    # final_1 = stochastic_product_search(
-    #         top_k=2,
-    #         fam_size=8,
-    #         original=final,
-    #         n_iter=50000,
-    #         verbose=1000,
-    #         verbose2=50000,
-    #         random_state=2019
-    #         )
-    #
-    #
-    # final_2 = stochastic_product_search(
-    #         top_k=2,
-    #         fam_size=9,
-    #         original=final_1,
-    #         n_iter=50000,
-    #         verbose=1000,
-    #         verbose2=100000,
-    #         random_state=2019
-    #         )

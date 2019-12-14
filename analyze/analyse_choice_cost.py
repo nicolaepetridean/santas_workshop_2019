@@ -70,20 +70,6 @@ def compute_daily_load(solution, initial_data):
 
     return days_load
 
-
-# def plot_daily_load(days_load):
-#     plt.figure(figsize=(34, 50))
-#     newdf = pd.DataFrame(days_load)
-#     ax = sns.barplot(x=newdf.index, y=np.concatenate(newdf.values))
-#     ax.set_ylim(0, 1.1 * 1000)
-#     plt.xlabel('day', fontsize=14)
-#     plt.ylabel('Count', fontsize=14)
-#     plt.title('Day Load', fontsize=20)
-#     plt.show()
-#
-#     return days_load
-
-
 def calculate_choice_id_per_family(solution, initial_data):
     family_choice_ids = np.zeros(5000)
     row = 0
@@ -126,6 +112,7 @@ def get_choice_cost(solution, initial_data):
 
 def get_choice_cost_per_family(solution, initial_data):
     days_cost = np.zeros(101)
+    choice_cost = []
     row = 0
     while row < solution.shape[0]:
         family_size = initial_data.iloc[row, 11]
@@ -139,86 +126,108 @@ def get_choice_cost_per_family(solution, initial_data):
             if initial_data.iloc[row, i] == day:
                 choice = i - 1
         if choice > 0:
-            days_cost[int(day)] += get_cost_by_choice(family_size)[1][choice-1]
+            family_cost = get_cost_by_choice(family_size)[1][choice-1]
+            days_cost[int(day)] += family_cost
+            choice_cost.append((row, choice, family_cost, family_size))
         row += 1
 
-    return days_cost
+    return days_cost, choice_cost
+
+def get_sum_of_choice_cost_per_size(solution, initial_data):
+    days_cost = np.zeros(101)
+    choice_cost = []
+    choice_cost_per_fam_size = np.zeros(11)
+    row = 0
+    while row < solution.shape[0]:
+        family_size = initial_data.iloc[row, 11]
+        try:
+            day = solution.iloc[row, 0]
+        except:
+            day = solution[row]
+
+        choice = 9
+        for i in range(1, 10):
+            if initial_data.iloc[row, i] == day:
+                choice = i - 1
+        if choice > 0:
+            family_cost = get_cost_by_choice(family_size)[1][choice-1]
+            days_cost[int(day)] += family_cost
+            choice_cost.append((row, choice, family_cost, family_size))
+            choice_cost_per_fam_size[family_size] += family_cost
+        row += 1
+
+    assert np.sum(choice_cost_per_fam_size) == 66064
+    return days_cost, choice_cost, choice_cost_per_fam_size
 
 
-def get_total_accounting_cost(daily_occupancy):
-    # Calculate the accounting cost
-    # The first day (day 100) is treated special
-    daily_occupancy_fix = np.zeros(101)
-    daily_occupancy_fix[100] = daily_occupancy[99]
-    for i in range(100):
-        daily_occupancy_fix[i] = daily_occupancy[i]
+def get_choice_distribution_vs_family_size(solution, initial_data):
+    row = 0
+    ch_vs_fami_size = {}
+    while row < solution.shape[0]:
+        family_size = initial_data.iloc[row, 11]
+        try:
+            day = solution.iloc[row, 0]
+        except:
+            day = solution[row]
 
-    accounting_cost = (daily_occupancy_fix[days[0]] - 125.0) / 400.0 * daily_occupancy_fix[days[0]] ** (0.5)
-    # using the max function because the soft constraints might allow occupancy to dip below 125
-    accounting_cost = max(0, accounting_cost)
+        choice = 9
+        for i in range(1, 10):
+            if initial_data.iloc[row, i] == day:
+                choice = i - 1
+        if family_size in ch_vs_fami_size.keys():
+            choices_distrib = ch_vs_fami_size[family_size]
+            if choice in choices_distrib.keys():
+                choices_distrib[choice] = choices_distrib[choice] + 1
+            else:
+                choices_distrib[choice] = 1
+            ch_vs_fami_size[family_size] = choices_distrib
+        else:
+            choices_distrib = {}
+            choices_distrib[choice] = 1
+            ch_vs_fami_size[family_size] = choices_distrib
 
-    # Loop over the rest of the days, keeping track of previous count
-    yesterday_count = daily_occupancy_fix[days[0]]
-    for day in days[1:]:
-        today_count = daily_occupancy_fix[day]
-        diff = abs(today_count - yesterday_count)
-        accounting_cost += max(0, (daily_occupancy_fix[day] - 125.0) / 400.0 * daily_occupancy_fix[day] ** (0.5 + diff / 50.0))
-        yesterday_count = today_count
+        row += 1
 
-    return accounting_cost
+    return ch_vs_fami_size
+
+def get_choice_distribution_vs_family_size(solution, initial_data, fam_size, withCost):
+    row = 0
+    days = np.zeros(100)
+    while row < solution.shape[0]:
+        family_size = initial_data.iloc[row, 11]
+        try:
+            day = solution.iloc[row, 0]
+        except:
+            day = solution[row]
+
+        choice = 9
+        for i in range(1, 10):
+            if initial_data.iloc[row, i] == day:
+                choice = i - 1
+
+        if fam_size == family_size and choice > 0:
+            days[solution.iloc[row, ]]
 
 
-def get_accounting_cost_per_day(daily_occupancy):
-    # Calculate the accounting cost
-    # The first day (day 100) is treated special
-    daily_accounting_cost = np.zeros(101)
-    daily_occupancy_fix = np.zeros(101)
-    daily_occupancy_fix[100] = daily_occupancy[99]
-    for i in range(100):
-        daily_occupancy_fix[i] = daily_occupancy[i]
-
-    accounting_cost = (daily_occupancy_fix[days[0]] - 125.0) / 400.0 * daily_occupancy_fix[days[0]] ** (0.5)
-    # using the max function because the soft constraints might allow occupancy to dip below 125
-    accounting_cost = max(0, accounting_cost)
-
-    # Loop over the rest of the days, keeping track of previous count
-    yesterday_count = daily_occupancy_fix[days[0]]
-    for day in days[1:]:
-        today_count = daily_occupancy_fix[day]
-        diff = abs(today_count - yesterday_count)
-        accounting_cost += max(0, (daily_occupancy_fix[day] - 125.0) / 400.0 * daily_occupancy_fix[day] ** (0.5 + diff / 50.0))
-        daily_accounting_cost[day] = max(0, (daily_occupancy_fix[day] - 125.0) / 400.0 * daily_occupancy_fix[day] ** (0.5 + diff / 50.0))
-        yesterday_count = today_count
-
-    return daily_accounting_cost
-
+    return ch_vs_fami_size
 
 if __name__ == "__main__":
     initial_data = return_family_data()
 
-    # solution = load_solution_data('submission_76101.75179796087.csv')
     solution = load_solution_data('submission_71393.75_BASE.csv')
-    # solution = load_solution_data('sample_submission_output_test.csv')
-    # solution = load_solution_data('sample_submission_output55_76448_submit.csv')
 
-    #daily_load = plot_daily_load(compute_daily_load(solution, initial_data))
     daily_load = compute_daily_load(solution, initial_data)
 
-    #choice_cost = plot_choice_cost(get_choice_cost(solution, initial_data))
+    days_cost, ch_cost = get_choice_cost_per_family(solution, initial_data)
+
+    days_cost, ch_cost, per_fam_size = get_sum_of_choice_cost_per_size(solution, initial_data)
+
+    per_fam_size = get_choice_distribution_vs_family_size(solution, initial_data)
+
     choice_cost = np.sum(get_choice_cost(solution, initial_data))
-
-    accounting_cost = get_total_accounting_cost(daily_load)
-
-    acc_cost = get_accounting_cost_per_day(daily_load)
-    # plot_accounting_cost(acc_cost)
 
     choices = calculate_choice_id_per_family(solution, initial_data)
 
-
     print('statistics per choice ' + str(np.unique(choices, return_counts=True)))
-
-    print('accounting cost :' + str(accounting_cost))
     print('choice_cost :' + str(choice_cost))
-
-    print('total_cost' + str(choice_cost+accounting_cost))
 
