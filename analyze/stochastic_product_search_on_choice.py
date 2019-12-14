@@ -359,7 +359,7 @@ def solveSantaLP():
 if __name__ == '__main__' :
     N_DAYS = 100
     N_FAMILIES = 5000
-    MAX_OCCUPANCY = 308
+    MAX_OCCUPANCY = 300
     MIN_OCCUPANCY = 125
 
     data = pd.read_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\family_data.csv', index_col='family_id')
