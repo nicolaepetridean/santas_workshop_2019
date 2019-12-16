@@ -61,7 +61,7 @@ def compute_daily_load(solution, initial_data):
     row = 0
     while row < solution.shape[0]:
         day = solution.iloc[row, 0]
-        n_people = initial_data.iloc[row, 11]
+        n_people = initial_data.iloc[row, 10]
         days_load[int(day)] += n_people
         row += 1
     print(" sum of all people is :" + str(np.sum(days_load)))

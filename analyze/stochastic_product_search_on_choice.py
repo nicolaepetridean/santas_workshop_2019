@@ -248,8 +248,13 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
 
     for i in range(n_iter):
         last_switch += 1
-
+        #candiates_fam_indices = np.random.choice((switch_candidates), size=1)
         fam_indices = np.random.choice(range(DESIRED.shape[0]), size=fam_size)
+
+        for id in fam_indices:
+            if id in EXCLUDE:
+                np.delete(fam_indices, np.where(fam_indices == id))
+        #fam_indices = np.append(fam_indices, candiates_fam_indices)
         changes = np.array(list(product(*DESIRED[fam_indices, top_k_jump:top_k].tolist())))
 
         for change in changes:
@@ -270,14 +275,14 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
                 last_switch = 0
                 print("New best score found : " + str(best_score))
 
-                if best_score < 71493:
+                if best_score < 71383:
                     sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
                     sub['assigned_day'] = best + 1
-                    sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\new\\submission_mixed_' + str(
+                    sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\new\\submission_' + str(
                         fam_size) + '_iter_' + str(i) + '_score_' + str(best_score) + '_.csv', index=False)
 
             else:
-                if last_switch > 49000:
+                if last_switch > 500000:
                     if lower_bound < new_score - best_score < upper_bound:
                             best_score = new_score
                             best = new
@@ -361,24 +366,66 @@ if __name__ == '__main__' :
     data = pd.read_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\family_data.csv', index_col='family_id')
 
     FAMILY_SIZE = data.n_people.values
-    DESIRED     = data[data.n_people < 7].values[:, :-1] - 1 #data[data.n_people < 7].values[:, :-1] - 1
+    DESIRED     = data.values[:, :-1] - 1 #data[data.n_people < 7].values[:, :-1] - 1
+    EXCLUDE     = []
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('new\\try_mixed_.csv')
+    prediction = load_solution_data('submission_score_71383.17_BASE.csv')
+
+    daily_load = compute_daily_load(prediction, data)
+    mix_pool = []
+    for item in range(prediction.shape[0]):
+        assigned_day = prediction['assigned_day'][item]
+        ch0 = data.iloc[item, 0]
+        if data.iloc[item, 10] > 7 and assigned_day == ch0:
+            if daily_load[ch0] > 290:
+                mix_pool.append(item)
+
+    best_item_switch = None
+    best_item_day = None
+    best_item_cost = 0
+    freed_day = 0
+
+    for item in mix_pool:
+        ex_day = prediction['assigned_day'][item]
+        for ch in range(1,5):
+            candidate_day = data.iloc[item, ch]
+            if candidate_day+daily_load[candidate_day] > 300:
+                continue
+            prediction['assigned_day'][item] = candidate_day
+            ch_cost, acc_cost = cost_function(prediction['assigned_day'].to_numpy() - 1)
+            if best_item_switch is None:
+                best_item_switch = item
+                best_item_day = candidate_day
+                best_item_cost = ch_cost + int(acc_cost)
+                freed_day = ex_day
+            else:
+                if ch_cost + int(acc_cost) < best_item_cost:
+                    best_item_switch = item
+                    best_item_day = candidate_day
+                    best_item_cost = ch_cost + int(acc_cost)
+                    freed_day = ex_day
+
+            prediction['assigned_day'][item] = ex_day
+
+    daily_load[freed_day] -= FAMILY_SIZE[best_item_switch]
+
+    prediction['assigned_day'][best_item_switch] = best_item_day
+
+    print('moved family is ' + str(best_item_switch) + ' , to day : ' + str(best_item_day))
 
     # for item in range(prediction.shape[0]):
-    #     daily_load = compute_daily_load(prediction, data)
-    #     assigned_day = prediction[item]
-    #     ch0 = data.iloc[item, 1]
-    #     if data.iloc[item, 11] > 6 & assigned_day == ch0:
-    #         if daily_load[ch0] > 290:
-    #             for new_choice in range(3):
-    #                 if daily_load['ch' + str(new_choice+1)] < 270:
-    #                     not_moved = False
-    #                     prediction[item] = data.iloc[item, new_choice + 2]
-    #                     print('moved : ' + str(item) + ' to choice ' + str(new_choice+1) + ', day : ' + data.iloc[item, new_choice + 2])
+    #     assigned_day = prediction['assigned_day'][item]
+    #     ch0 = data.iloc[item, 0]
+    #     if data.iloc[item, 10] < 7 and assigned_day != ch0 and ch0 == freed_day:
+    #         if daily_load[freed_day] + FAMILY_SIZE[item] < 300:
+    #             prediction['assigned_day'][item] = freed_day
+    #             daily_load[freed_day] += FAMILY_SIZE[item]
+    #             print('made a move')
 
+    print('found the following number items as candidates' + str(len(mix_pool)))
+    EXCLUDE = mix_pool
 
     prediction = prediction['assigned_day'].to_numpy()
 
@@ -388,8 +435,8 @@ if __name__ == '__main__' :
 
     iteration = 1
 
-    fam_size_out = 4
-    n_iter = 8000000
+    fam_size_out = 8
+    n_iter = 1500000
 
     initial_data = return_family_data()
 
@@ -398,17 +445,24 @@ if __name__ == '__main__' :
         #switch_candidates = famillies
         final = stochastic_product_search(
                 top_k_jump=0,
-                top_k=3,
+                top_k=2,
                 fam_size=fam_size_out,
                 original=prediction,
                 n_iter=n_iter,
                 verbose=1000,
                 verbose2=1000,
-                random_state=2023,
+                random_state=2026,
                 switch_candidates=[],
                 initial_data = initial_data
                 )
 
         prediction = final
+
+        sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
+        sub['assigned_day'] = final + 1
+        sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\new\\submission_plusone_uniq_' + str(fam_size_out) + '.csv', index=False)
+        sub['assigned_day'] = final
+        sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\new\\submission_uniq_' + str(fam_size_out) + '.csv',
+                   index=False)
 
         fam_size_out -= 1
