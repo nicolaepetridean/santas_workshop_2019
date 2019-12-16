@@ -282,7 +282,7 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
                         fam_size) + '_iter_' + str(i) + '_score_' + str(best_score) + '_.csv', index=False)
 
             else:
-                if last_switch > 500000:
+                if last_switch > 1000000:
                     if lower_bound < new_score - best_score < upper_bound:
                             best_score = new_score
                             best = new
@@ -379,7 +379,7 @@ if __name__ == '__main__' :
         assigned_day = prediction['assigned_day'][item]
         ch0 = data.iloc[item, 0]
         if data.iloc[item, 10] > 7 and assigned_day == ch0:
-            if daily_load[ch0] > 290:
+            if daily_load[ch0] > 296:
                 mix_pool.append(item)
 
     best_item_switch = None
@@ -391,7 +391,7 @@ if __name__ == '__main__' :
         ex_day = prediction['assigned_day'][item]
         for ch in range(1,5):
             candidate_day = data.iloc[item, ch]
-            if candidate_day+daily_load[candidate_day] > 300:
+            if daily_load[candidate_day] > 270:
                 continue
             prediction['assigned_day'][item] = candidate_day
             ch_cost, acc_cost = cost_function(prediction['assigned_day'].to_numpy() - 1)
@@ -435,8 +435,8 @@ if __name__ == '__main__' :
 
     iteration = 1
 
-    fam_size_out = 8
-    n_iter = 1500000
+    fam_size_out = 7
+    n_iter = 5000000
 
     initial_data = return_family_data()
 
@@ -451,7 +451,7 @@ if __name__ == '__main__' :
                 n_iter=n_iter,
                 verbose=1000,
                 verbose2=1000,
-                random_state=2026,
+                random_state=2032,
                 switch_candidates=[],
                 initial_data = initial_data
                 )

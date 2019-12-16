@@ -71,6 +71,21 @@ def compute_daily_load(solution, initial_data):
     return days_load
 
 
+def compute_daily_load_2(solution, initial_data):
+    days_load = np.zeros(101)
+    row = 0
+    while row < solution.shape[0]:
+        day = solution.iloc[row, 0]
+        n_people = initial_data.iloc[row, 11]
+        days_load[int(day)] += n_people
+        row += 1
+    print(" sum of all people is :" + str(np.sum(days_load)))
+    print(" min of all days is :" + str(np.min(days_load)))
+    print(" max of all days is :" + str(np.max(days_load)))
+
+    return days_load
+
+
 # def plot_daily_load(days_load):
 #     plt.figure(figsize=(34, 50))
 #     newdf = pd.DataFrame(days_load)
@@ -197,12 +212,12 @@ if __name__ == "__main__":
     initial_data = return_family_data()
 
     # solution = load_solution_data('submission_76101.75179796087.csv')
-    solution = load_solution_data('new\\try_mixed_.csv')
+    solution = load_solution_data('submission_71393.75_BASE.csv')
     # solution = load_solution_data('sample_submission_output_test.csv')
     # solution = load_solution_data('sample_submission_output55_76448_submit.csv')
 
     #daily_load = plot_daily_load(compute_daily_load(solution, initial_data))
-    daily_load = compute_daily_load(solution, initial_data)
+    daily_load = compute_daily_load_2(solution, initial_data)
 
     #choice_cost = plot_choice_cost(get_choice_cost(solution, initial_data))
     choice_cost = np.sum(get_choice_cost(solution, initial_data))
