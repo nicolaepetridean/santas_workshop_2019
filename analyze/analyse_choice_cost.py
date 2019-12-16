@@ -156,7 +156,7 @@ def get_sum_of_choice_cost_per_size(solution, initial_data):
             choice_cost_per_fam_size[family_size] += family_cost
         row += 1
 
-    assert np.sum(choice_cost_per_fam_size) == 66055
+    assert np.sum(choice_cost_per_fam_size) == 66019
     return days_cost, choice_cost, choice_cost_per_fam_size
 
 
@@ -193,7 +193,7 @@ def get_choice_distribution_vs_family_size(solution, initial_data):
 if __name__ == "__main__":
     initial_data = return_family_data()
 
-    solution = load_solution_data('submission_score_71383.17_BASE.csv')
+    solution = load_solution_data('submission_score_71376.78_BASE.csv')
 
     daily_load = compute_daily_load(solution, initial_data)
 

@@ -246,11 +246,15 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
     lower_bound = 30
     upper_bound = 80
 
+    init_fam_size = fam_size
+    init_top_k = top_k
+
     for i in range(n_iter):
         last_switch += 1
         #candiates_fam_indices = np.random.choice((switch_candidates), size=1)
+        fam_size = np.random.choice(range(3, init_fam_size), size=1)[0]
+        top_k = np.random.choice(range(2, init_top_k), size=1)[0]
         fam_indices = np.random.choice(range(DESIRED.shape[0]), size=fam_size)
-
         for id in fam_indices:
             if id in EXCLUDE:
                 np.delete(fam_indices, np.where(fam_indices == id))
@@ -275,7 +279,7 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
                 last_switch = 0
                 print("New best score found : " + str(best_score))
 
-                if best_score < 71383:
+                if best_score < 71376:
                     sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
                     sub['assigned_day'] = best + 1
                     sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\new\\submission_' + str(
@@ -371,15 +375,15 @@ if __name__ == '__main__' :
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('submission_score_71383.17_BASE.csv')
+    prediction = load_solution_data('submission_score_71376.78_BASE.csv')
 
     daily_load = compute_daily_load(prediction, data)
     mix_pool = []
     for item in range(prediction.shape[0]):
         assigned_day = prediction['assigned_day'][item]
         ch0 = data.iloc[item, 0]
-        if data.iloc[item, 10] > 7 and assigned_day == ch0:
-            if daily_load[ch0] > 296:
+        if data.iloc[item, 10] > 6 and assigned_day == ch0 and item != 2571:
+            if daily_load[ch0] >= 292:
                 mix_pool.append(item)
 
     best_item_switch = None
@@ -435,7 +439,7 @@ if __name__ == '__main__' :
 
     iteration = 1
 
-    fam_size_out = 7
+    fam_size_out = 9
     n_iter = 5000000
 
     initial_data = return_family_data()
@@ -445,13 +449,13 @@ if __name__ == '__main__' :
         #switch_candidates = famillies
         final = stochastic_product_search(
                 top_k_jump=0,
-                top_k=2,
+                top_k=4,
                 fam_size=fam_size_out,
                 original=prediction,
                 n_iter=n_iter,
                 verbose=1000,
-                verbose2=1000,
-                random_state=2032,
+                verbose2=100,
+                random_state=1996,
                 switch_candidates=[],
                 initial_data = initial_data
                 )
