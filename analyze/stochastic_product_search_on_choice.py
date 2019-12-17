@@ -257,7 +257,7 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
         fam_indices = np.random.choice(range(DESIRED.shape[0]), size=fam_size)
         for id in fam_indices:
             if id in EXCLUDE:
-                np.delete(fam_indices, np.where(fam_indices == id))
+                fam_indices = np.delete(fam_indices, np.where(fam_indices == id))
         #fam_indices = np.append(fam_indices, candiates_fam_indices)
         changes = np.array(list(product(*DESIRED[fam_indices, top_k_jump:top_k].tolist())))
 
@@ -279,7 +279,7 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
                 last_switch = 0
                 print("New best score found : " + str(best_score))
 
-                if best_score < 71363:
+                if best_score < 71342:
                     sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
                     sub['assigned_day'] = best + 1
                     sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\new\\submission_' + str(
@@ -375,7 +375,7 @@ if __name__ == '__main__' :
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('new\submission_4_iter_207431_score_71363.01229143386_.csv')
+    prediction = load_solution_data('submission_71342.94_BASE.csv')
 
     daily_load = compute_daily_load(prediction, data)
     mix_pool = []
@@ -420,7 +420,7 @@ if __name__ == '__main__' :
     print('moved family is ' + str(best_item_switch) + ' , to day : ' + str(best_item_day))
 
     print('found the following number items as candidates' + str(len(mix_pool)))
-    EXCLUDE = mix_pool
+    EXCLUDE.append(best_item_switch)
 
     prediction = prediction['assigned_day'].to_numpy()
 
@@ -430,7 +430,7 @@ if __name__ == '__main__' :
 
     iteration = 1
 
-    fam_size_out = 8
+    fam_size_out = 6
     n_iter = 5000000
 
     initial_data = return_family_data()
@@ -440,13 +440,13 @@ if __name__ == '__main__' :
         #switch_candidates = famillies
         final = stochastic_product_search(
                 top_k_jump=0,
-                top_k=2,
+                top_k=3,
                 fam_size=fam_size_out,
                 original=prediction,
                 n_iter=n_iter,
                 verbose=1000,
                 verbose2=1000,
-                random_state=2044,
+                random_state=2034,
                 switch_candidates=[],
                 initial_data = initial_data
                 )
