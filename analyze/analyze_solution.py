@@ -212,7 +212,7 @@ if __name__ == "__main__":
     initial_data = return_family_data()
 
     # solution = load_solution_data('submission_76101.75179796087.csv')
-    solution = load_solution_data('new\submission_6_iter_125502_score_71365.81457851511_.csv')
+    solution = load_solution_data('new\submission_4_iter_207431_score_71363.01229143386_.csv')
     # solution = load_solution_data('sample_submission_output_test.csv')
     # solution = load_solution_data('sample_submission_output55_76448_submit.csv')
 
