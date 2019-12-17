@@ -430,7 +430,7 @@ if __name__ == '__main__' :
 
     iteration = 1
 
-    fam_size_out = 6
+    fam_size_out = 7
     n_iter = 5000000
 
     initial_data = return_family_data()
@@ -440,13 +440,13 @@ if __name__ == '__main__' :
         #switch_candidates = famillies
         final = stochastic_product_search(
                 top_k_jump=0,
-                top_k=3,
+                top_k=2,
                 fam_size=fam_size_out,
                 original=prediction,
                 n_iter=n_iter,
                 verbose=1000,
                 verbose2=1000,
-                random_state=2034,
+                random_state=2015,
                 switch_candidates=[],
                 initial_data = initial_data
                 )
