@@ -246,18 +246,18 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
     lower_bound = 30
     upper_bound = 80
 
-    init_fam_size = fam_size
-    init_top_k = top_k
-
     for i in range(n_iter):
         last_switch += 1
         #candiates_fam_indices = np.random.choice((switch_candidates), size=1)
         # fam_size = np.random.choice(range(4, init_fam_size), size=1)[0]
         # top_k = np.random.choice(range(0, init_top_k), size=1)[0]
+        np.random.seed(random_state + i)
         fam_indices = np.random.choice(range(DESIRED.shape[0]), size=fam_size)
-        for id in fam_indices:
-            if id in EXCLUDE:
-                fam_indices = np.delete(fam_indices, np.where(fam_indices == id))
+
+        if n_iter < 5000:
+            for id in fam_indices:
+                if id in EXCLUDE:
+                    fam_indices = np.delete(fam_indices, np.where(fam_indices == id))
         #fam_indices = np.append(fam_indices, candiates_fam_indices)
         changes = np.array(list(product(*DESIRED[fam_indices, top_k_jump:top_k].tolist())))
 
@@ -274,8 +274,6 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
             if new_score < best_score:
                 best_score = new_score
                 best = new
-                best_choice_cost = new_choice_cost
-                best_accounting_cost = new_accounting_cost
                 last_switch = 0
                 print("New best score found : " + str(best_score))
 
@@ -290,11 +288,8 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
                     if lower_bound < new_score - best_score < upper_bound:
                             best_score = new_score
                             best = new
-                            best_choice_cost = new_choice_cost
-                            best_accounting_cost = new_accounting_cost
                             print("JUMP. New best score found : " + str(best_score))
                             last_switch = 0
-
 
         if verbose and i % verbose == 0:
             print(f"Iteration #{i}: Best score is {best_score:.2f}      ", end='\r')
@@ -312,7 +307,6 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
 
 def solveSantaLP():
     S = pywraplp.Solver('SolveAssignmentProblem', pywraplp.Solver.GLOP_LINEAR_PROGRAMMING)
-
     x = {}
     for i in range(N_FAMILIES):
         for j in range(N_DAYS):
@@ -383,7 +377,7 @@ if __name__ == '__main__' :
         assigned_day = prediction['assigned_day'][item]
         ch0 = data.iloc[item, 0]
         if data.iloc[item, 10] >= 7:
-            if daily_load[ch0] > 298 and assigned_day == ch0:
+            if daily_load[ch0] >= 298 and assigned_day == ch0:
                 mix_pool.append(item)
 
     best_item_switch = None
@@ -395,7 +389,7 @@ if __name__ == '__main__' :
         ex_day = prediction['assigned_day'][item]
         for ch in range(1, 5):
             candidate_day = data.iloc[item, ch]
-            if daily_load[candidate_day] > 270:
+            if daily_load[candidate_day] > 250:
                 continue
             prediction['assigned_day'][item] = candidate_day
             ch_cost, acc_cost = cost_function(prediction['assigned_day'].to_numpy() - 1)
@@ -411,30 +405,47 @@ if __name__ == '__main__' :
                     best_item_cost = ch_cost + int(acc_cost)
                     freed_day = ex_day
 
+
             prediction['assigned_day'][item] = ex_day
 
     daily_load[freed_day] -= FAMILY_SIZE[best_item_switch]
-
     prediction['assigned_day'][best_item_switch] = best_item_day
 
-    print('moved family is ' + str(best_item_switch) + ' , to day : ' + str(best_item_day))
+    switches = []
+    for item in range(data.shape[0]):
+        if data.iloc[item, 0] == freed_day:
+            if prediction['assigned_day'][item] != freed_day and FAMILY_SIZE[item] < 6:
+                switches.append(item)
 
+    start = 0
+    sum = 0
+    if len(switches) > 0:
+        while daily_load[freed_day] < 299 and start < len(switches):
+            if sum + FAMILY_SIZE[switches[start]] < FAMILY_SIZE[best_item_switch]:
+                current_day = prediction['assigned_day'][switches[start]]
+                if daily_load[current_day] - FAMILY_SIZE[switches[start]] >= 125:
+                    daily_load[freed_day] += FAMILY_SIZE[switches[start]]
+                    prediction['assigned_day'][switches[start]] = freed_day
+                    sum += FAMILY_SIZE[switches[start]]
+                    EXCLUDE.append(switches[start])
+            start += 1
+
+    print('moved family is ' + str(best_item_switch) + ' , to day : ' + str(best_item_day))
+    print('sum of replaced families is ' + str(sum))
     print('found the following number items as candidates' + str(len(mix_pool)))
+
     EXCLUDE.append(best_item_switch)
 
     prediction = prediction['assigned_day'].to_numpy()
-
     prediction = prediction - 1
     penalty, accounting_cost, n_out_of_range, occupancy = cost_stats(prediction)
     print('{}, {:.0f}'.format(penalty.sum(), accounting_cost.sum()))
 
     iteration = 1
-
-    fam_size_out = 7
+    fam_size_out = 8
     n_iter = 5000000
 
     initial_data = return_family_data()
-
     while fam_size_out > 1:
         # compute non zero choices
         #switch_candidates = famillies
@@ -446,7 +457,7 @@ if __name__ == '__main__' :
                 n_iter=n_iter,
                 verbose=1000,
                 verbose2=1000,
-                random_state=2015,
+                random_state=2037,
                 switch_candidates=[],
                 initial_data = initial_data
                 )

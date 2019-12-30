@@ -188,7 +188,7 @@ def return_family_data():
 
 if __name__ == "__main__":
 
-    solution = an_solution.load_solution_data('submission_stoc_71423.17_BASE.csv')
+    solution = an_solution.load_solution_data('submission_on_mip_3.csv')
     initial_data = return_family_data()
 
     days_load = an_solution.compute_daily_load(solution, initial_data)

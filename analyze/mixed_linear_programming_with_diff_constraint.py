@@ -5,7 +5,7 @@ from numba import njit
 from itertools import product
 import matplotlib.pylab as plt
 from ortools.linear_solver import pywraplp
-from analyze.analyze_solution import load_solution_data, calculate_choice_id_per_family, return_family_data
+from analyze.analyze_solution import load_solution_data, return_family_data, compute_daily_load
 
 def get_penalty(n, choice):
     penalty = None
@@ -112,7 +112,7 @@ def cost_stats(prediction):
 def cost_function(prediction):
     penalty, daily_occupancy = pcost(prediction)
     accounting_cost, n_out_of_range = acost(daily_occupancy)
-    return (penalty + accounting_cost + n_out_of_range*100000000, accounting_cost, penalty)
+    return penalty + n_out_of_range*100000000, accounting_cost
 
 
 # fixMinOccupancy, fixMaxOccupancy + helpers
@@ -148,7 +148,7 @@ def findAnotherDay4Fam(prediction, fam, occupancy):
 def bestFamAdd(prediction, day, occupancy):
     best_cost = np.inf
     best_fam = prediction[day]
-    for fam in np.where(prediction!=day)[0]:
+    for fam in np.where(prediction != day)[0]:
         old_day = prediction[fam]
         prediction[fam] = day
         new_cost, _ = cost_function_(prediction)
@@ -197,109 +197,8 @@ def fixMinOccupancy(prediction):
             penalty, accounting_cost, n_out_of_range, occupancy = cost_stats(prediction)
 
 
-# swappers
-
-def findBetterDay4Family(pred):
-    fobs = np.argsort(FAMILY_SIZE)
-    score = cost_function(pred)
-    original_score = np.inf
-
-    while original_score > score:
-        original_score = score
-        for family_id in fobs:
-            for pick in range(10):
-                day = DESIRED[family_id, pick]
-                oldvalue = pred[family_id]
-                pred[family_id] = day
-                new_score = cost_function(pred)
-                if new_score < score:
-                    score = new_score
-                else:
-                    pred[family_id] = oldvalue
-
-        print(score, end='\r')
-    print(score)
-
-
-def stochastic_product_search(top_k_jump, top_k, fam_size, original,
-                              verbose=1000, verbose2=50000,
-                              n_iter=500, random_state=2019):
-    """
-    original (np.array): The original day assignments.
-
-    At every iterations, randomly sample fam_size families. Then, given their top_k
-    choices, compute the Cartesian product of the families' choices, and compute the
-    score for each of those top_k^fam_size products.
-    """
-    best = original.copy()
-    best_score, acc_cost, pen_cost = cost_function(best)
-    initial_score = best_score
-    np.random.seed(random_state)
-    SCHUFFLE_list_loc = SCHUFFLE_list
-
-    last_change = 3000
-
-    for i in range(n_iter):
-        fam_indices = np.random.choice(SCHUFFLE_list_loc, size=fam_size)
-        changes = np.array(list(product(*DESIRED[fam_indices, top_k_jump:top_k].tolist())))
-        last_change += 1
-        for change in changes:
-            new = best.copy()
-            new[fam_indices] = change
-
-            new_score, new_acc, new_pen_cost = cost_function(new)
-
-            if new_score < best_score or (last_change > 8000 and 1 <= int(new_score - best_score) <= 15):
-                    best_score = new_score
-                    acc_cost = new_acc
-                    pen_cost = new_pen_cost
-                    best = new
-
-                    last_change = 0
-                    if new_score < 69858.95:
-                        sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
-                        sub['assigned_day'] = best + 1
-                        sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\submission_on_jump_' + str(
-                            best_score) + '.csv', index=False)
-
-            # if last_change > 400000:
-            #     best, SCHUFFLE_list_loc = make_a_move(best)
-            #     new_score, new_acc, new_pen_cost = cost_function(best)
-            #     best_score = new_score
-            #     acc_cost = new_acc
-            #     pen_cost = new_pen_cost
-            #     last_change = 0
-
-        if verbose and i % verbose == 0:
-            print(f"Iteration #{i}: Best score is {best_score:.2f}      ", end='\r')
-
-        if verbose2 and i % verbose2 == 0:
-            print(f"Iteration #{i}: Best score is {best_score:.2f}      ")
-            print(f"Iteration #{i}: Last change is {last_change:.2f}      ")
-            print(f"Iteration #{i}: new score is {new_score:.2f}      ")
-            print(f"Iteration #{i}: family indices are {str(fam_indices)}      ")
-
-    print(f"Final best score is {best_score:.2f}")
-    return best
-
-
-def compute_daily_load(solution, initial_data):
-    days_load = np.zeros(101)
-    row = 0
-    while row < solution.shape[0]:
-        day = solution[row]
-        n_people = initial_data.iloc[row, 10]
-        days_load[int(day)] += n_people
-        row += 1
-    print(" sum of all people is :" + str(np.sum(days_load)))
-    print(" min of all days is :" + str(np.min(days_load)))
-    print(" max of all days is :" + str(np.max(days_load)))
-
-    return days_load
-
-
-def solveSantaLP():
-    S = pywraplp.Solver('SolveAssignmentProblem', pywraplp.Solver.GLOP_LINEAR_PROGRAMMING)
+def solveSantaLP(existing_occupancy, existing_prediction):
+    S = pywraplp.Solver('SolveAssignmentProblem', pywraplp.Solver.BOP_INTEGER_PROGRAMMING)
 
     x = {}
     for i in range(N_FAMILIES):
@@ -319,16 +218,30 @@ def solveSantaLP():
     S.Minimize(preference_cost)
 
     # Constraints
-    for j in range(N_DAYS - 1):
-        S.Add(daily_occupancy[j] - daily_occupancy[j + 1] <= 32)
-        S.Add(daily_occupancy[j + 1] - daily_occupancy[j] <= 31)
-
     for i in range(N_FAMILIES):
         S.Add(family_presence[i] == 1)
 
     for j in range(N_DAYS):
-        S.Add(daily_occupancy[j] >= MIN_OCCUPANCY)
-        S.Add(daily_occupancy[j] <= MAX_OCCUPANCY)
+        minim = max(existing_occupancy[j+1]-1, 125)
+        maxim = min(existing_occupancy[j+1]+1, 300)
+        S.Add(daily_occupancy[j] <= maxim)
+        S.Add(daily_occupancy[j] >= minim)
+
+    # for d in range(N_DAYS - 1):
+    #     S.Add(daily_occupancy[d]-daily_occupancy[d+1] <= existing_occupancy[d] - existing_occupancy[d+1] + 1)
+        #S.Add(daily_occupancy[d+1]-daily_occupancy[d] <= existing_occupancy[d+1] - existing_occupancy[d] + 1)
+        # else:
+        #     S.Add(daily_occupancy[d+1]-daily_occupancy[d] <= (existing_occupancy[d+1]-existing_occupancy[d] + 1))
+
+    S.EnableOutput()
+    S.set_time_limit(640*3600)
+
+    valid_solution = []
+    for family in range(N_FAMILIES):
+        valid_solution.extend([False for i in range(N_DAYS)])
+        valid_solution[family * N_DAYS + existing_prediction['assigned_day'][family] - 1] = True
+
+    S.SetHint([x[i, j] for i in range(N_FAMILIES) for j in range(N_DAYS)], valid_solution)
 
     res = S.Solve()
 
@@ -359,44 +272,26 @@ if __name__ == '__main__' :
 
     FAMILY_SIZE = data.n_people.values
     DESIRED     = data.values[:, :-1] - 1
-    SCHUFFLE_list = np.array(data.index.tolist())
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('submission_69858.95.csv')
-
-    prediction = prediction['assigned_day'].to_numpy()
-    prediction = prediction - 1
-    penalty, accounting_cost, n_out_of_range, occupancy = cost_stats(prediction)
-    print('{}, {:.0f}'.format(penalty.sum(), accounting_cost.sum()))
-
-    iteration = 1
-
-    fam_size_out = 5
-    n_iter = 7000000
-    skip_1 = -1
-    skip_2 = -1
-
     initial_data = return_family_data()
-    #prediction, SCHUFFLE_list = make_a_move(prediction)
-    while fam_size_out > 2:
-        # compute non zero choices
-        final = stochastic_product_search(
-                top_k_jump=0,
-                top_k=3,
-                fam_size=fam_size_out,
-                original=prediction,
-                n_iter=n_iter,
-                verbose=1000,
-                verbose2=2500,
-                random_state=2021,
-                )
+    existing_prediction = load_solution_data('submission_71322.02_BASE.csv')
+    daily_load = compute_daily_load(existing_prediction, initial_data)
 
-        prediction = final
-        skip_1 = -1
-        skip_2 = -1
+    prediction = solveSantaLP(daily_load, existing_prediction)
+    penalty, accounting_cost, n_out_of_range, occupancy = cost_stats(prediction)
+    print(penalty.sum(), accounting_cost.sum(), n_out_of_range, occupancy.min(), occupancy.max())
+    #
+    fixMinOccupancy(prediction)
+    fixMaxOccupancy(prediction)
+    penalty, accounting_cost, n_out_of_range, occupancy = cost_stats(prediction)
 
-        sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
-        sub['assigned_day'] = final + 1
-        sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\submission_on_jump_' + str(fam_size_out) + '.csv', index=False)
-        fam_size_out -= 1
+    sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
+    sub['assigned_day'] = prediction+1
+    sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\new\\try_mixed_with_diff.csv', index=False)
+
+    print('GAHGS {}, {:.0f}'.format(penalty.sum(), accounting_cost.sum()))
+
+
+

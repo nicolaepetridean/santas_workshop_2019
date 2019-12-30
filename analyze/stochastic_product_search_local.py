@@ -5,7 +5,7 @@ from numba import njit
 from itertools import product
 import matplotlib.pylab as plt
 from ortools.linear_solver import pywraplp
-from analyze.analyze_solution import load_solution_data, calculate_choice_id_per_family, return_family_data
+from analyze.analyze_solution import load_solution_data, calculate_choice_id_per_family, return_family_data, get_choice_cost, compute_daily_load
 
 def get_penalty(n, choice):
     penalty = None
@@ -112,7 +112,7 @@ def cost_stats(prediction):
 def cost_function(prediction):
     penalty, daily_occupancy = pcost(prediction)
     accounting_cost, n_out_of_range = acost(daily_occupancy)
-    return (penalty + accounting_cost + n_out_of_range*100000000, accounting_cost, penalty)
+    return penalty + n_out_of_range*100000000, accounting_cost
 
 
 # fixMinOccupancy, fixMaxOccupancy + helpers
@@ -201,7 +201,8 @@ def fixMinOccupancy(prediction):
 
 def findBetterDay4Family(pred):
     fobs = np.argsort(FAMILY_SIZE)
-    score = cost_function(pred)
+    (init_choice_cost, init_accounting_cost) = cost_function(pred)
+    score = init_choice_cost + init_accounting_cost
     original_score = np.inf
 
     while original_score > score:
@@ -211,7 +212,8 @@ def findBetterDay4Family(pred):
                 day = DESIRED[family_id, pick]
                 oldvalue = pred[family_id]
                 pred[family_id] = day
-                new_score = cost_function(pred)
+                (choice_cost, accounting_cost) = cost_function(pred)
+                new_score = choice_cost + accounting_cost
                 if new_score < score:
                     score = new_score
                 else:
@@ -223,7 +225,7 @@ def findBetterDay4Family(pred):
 
 def stochastic_product_search(top_k_jump, top_k, fam_size, original,
                               verbose=1000, verbose2=50000,
-                              n_iter=500, random_state=2019):
+                              n_iter=500, random_state=2019, switch_candidates=[], initial_data=[]):
     """
     original (np.array): The original day assignments.
 
@@ -231,71 +233,56 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
     choices, compute the Cartesian product of the families' choices, and compute the
     score for each of those top_k^fam_size products.
     """
-    best = original.copy()
-    best_score, acc_cost, pen_cost = cost_function(best)
-    initial_score = best_score
-    np.random.seed(random_state)
-    SCHUFFLE_list_loc = SCHUFFLE_list
 
-    last_change = 3000
+    best = original.copy()
+    (best_choice_cost, best_accounting_cost) = cost_function(best)
+    best_score = best_choice_cost + best_accounting_cost
+
+    np.random.seed(random_state)
+    last_switch = 0
 
     for i in range(n_iter):
-        fam_indices = np.random.choice(SCHUFFLE_list_loc, size=fam_size)
+        last_switch += 1
+        candiates_fam_indices = np.random.choice((switch_candidates), size=fam_size-1)
+        # fam_size = np.random.choice(range(4, init_fam_size), size=1)[0]
+        # top_k = np.random.choice(range(0, init_top_k), size=1)[0]
+        np.random.seed(random_state + i)
+        fam_indices = np.random.choice(range(DESIRED.shape[0]), size=1)
+        fam_indices = np.append(fam_indices, candiates_fam_indices)
+        #fam_indices = np.append(fam_indices, candiates_fam_indices)
         changes = np.array(list(product(*DESIRED[fam_indices, top_k_jump:top_k].tolist())))
-        last_change += 1
+
         for change in changes:
             new = best.copy()
             new[fam_indices] = change
 
-            new_score, new_acc, new_pen_cost = cost_function(new)
+            (new_choice_cost, new_accounting_cost) = cost_function(new)
+            new_score = new_choice_cost + new_accounting_cost
 
-            if new_score < best_score or (last_change > 8000 and 1 <= int(new_score - best_score) <= 15):
-                    best_score = new_score
-                    acc_cost = new_acc
-                    pen_cost = new_pen_cost
-                    best = new
+            if new_score < best_score:
+                best_score = new_score
+                best = new
+                last_switch = 0
+                print("New best score found : " + str(best_score))
 
-                    last_change = 0
-                    if new_score < 69858.95:
-                        sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
-                        sub['assigned_day'] = best + 1
-                        sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\submission_on_jump_' + str(
-                            best_score) + '.csv', index=False)
+                if best_score < 71342:
+                    sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
+                    sub['assigned_day'] = best + 1
+                    sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\new\\submission_' + str(
+                        fam_size) + '_iter_' + str(i) + '_score_' + str(best_score) + '_.csv', index=False)
 
-            # if last_change > 400000:
-            #     best, SCHUFFLE_list_loc = make_a_move(best)
-            #     new_score, new_acc, new_pen_cost = cost_function(best)
-            #     best_score = new_score
-            #     acc_cost = new_acc
-            #     pen_cost = new_pen_cost
-            #     last_change = 0
-
+        if last_switch > 60000 + len(switch_candidates)*100:
+            break
         if verbose and i % verbose == 0:
             print(f"Iteration #{i}: Best score is {best_score:.2f}      ", end='\r')
 
         if verbose2 and i % verbose2 == 0:
             print(f"Iteration #{i}: Best score is {best_score:.2f}      ")
-            print(f"Iteration #{i}: Last change is {last_change:.2f}      ")
             print(f"Iteration #{i}: new score is {new_score:.2f}      ")
             print(f"Iteration #{i}: family indices are {str(fam_indices)}      ")
 
     print(f"Final best score is {best_score:.2f}")
     return best
-
-
-def compute_daily_load(solution, initial_data):
-    days_load = np.zeros(101)
-    row = 0
-    while row < solution.shape[0]:
-        day = solution[row]
-        n_people = initial_data.iloc[row, 10]
-        days_load[int(day)] += n_people
-        row += 1
-    print(" sum of all people is :" + str(np.sum(days_load)))
-    print(" min of all days is :" + str(np.min(days_load)))
-    print(" max of all days is :" + str(np.max(days_load)))
-
-    return days_load
 
 
 def solveSantaLP():
@@ -358,14 +345,13 @@ if __name__ == '__main__' :
     data = pd.read_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\family_data.csv', index_col='family_id')
 
     FAMILY_SIZE = data.n_people.values
-    DESIRED     = data.values[:, :-1] - 1
-    SCHUFFLE_list = np.array(data.index.tolist())
+    DESIRED     = data.values[:, :-1] - 1 #data[data.n_people < 7].values[:, :-1] - 1
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('submission_69858.95.csv')
-
+    prediction = load_solution_data('submission_71342.94_BASE.csv')
     prediction = prediction['assigned_day'].to_numpy()
+
     prediction = prediction - 1
     penalty, accounting_cost, n_out_of_range, occupancy = cost_stats(prediction)
     print('{}, {:.0f}'.format(penalty.sum(), accounting_cost.sum()))
@@ -373,14 +359,22 @@ if __name__ == '__main__' :
     iteration = 1
 
     fam_size_out = 5
-    n_iter = 7000000
-    skip_1 = -1
-    skip_2 = -1
+    n_iter = 5000000
 
     initial_data = return_family_data()
-    #prediction, SCHUFFLE_list = make_a_move(prediction)
-    while fam_size_out > 2:
-        # compute non zero choices
+    day = 2
+
+    while fam_size_out > 1 and day < 100:
+        # compute local neighbourhood
+        mix_pool = []
+        print(' searching arround day ' + str(day))
+        for item in range(prediction.shape[0]):
+            for ch in range(1, 4):
+                candidate_day = data.iloc[item, ch]
+                if int(candidate_day) in [day+1, day-1]:
+                    mix_pool.append(item)
+        day += 1
+        print('mix pool size is : ' + str(len(mix_pool)))
         final = stochastic_product_search(
                 top_k_jump=0,
                 top_k=3,
@@ -388,15 +382,19 @@ if __name__ == '__main__' :
                 original=prediction,
                 n_iter=n_iter,
                 verbose=1000,
-                verbose2=2500,
-                random_state=2021,
+                verbose2=1000,
+                random_state=2036,
+                switch_candidates=mix_pool,
+                initial_data = initial_data
                 )
 
         prediction = final
-        skip_1 = -1
-        skip_2 = -1
 
         sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
         sub['assigned_day'] = final + 1
-        sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\submission_on_jump_' + str(fam_size_out) + '.csv', index=False)
-        fam_size_out -= 1
+        sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\new\\submission_plusone_uniq_' + str(fam_size_out) + '.csv', index=False)
+        sub['assigned_day'] = final
+        sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\new\\submission_uniq_' + str(fam_size_out) + '.csv',
+                   index=False)
+
+        #fam_size_out -= 1

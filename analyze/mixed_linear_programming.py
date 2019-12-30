@@ -148,7 +148,7 @@ def findAnotherDay4Fam(prediction, fam, occupancy):
 def bestFamAdd(prediction, day, occupancy):
     best_cost = np.inf
     best_fam = prediction[day]
-    for fam in np.where(prediction!=day)[0]:
+    for fam in np.where(prediction != day)[0]:
         old_day = prediction[fam]
         prediction[fam] = day
         new_cost, _ = cost_function_(prediction)
@@ -222,10 +222,13 @@ def solveSantaLP(existing_occupancy, existing_prediction):
         S.Add(family_presence[i] == 1)
 
     for j in range(N_DAYS):
-        S.Add(daily_occupancy[j] == existing_occupancy[j+1])
+        minim = max(existing_occupancy[j+1]-7, 125)
+        maxim = min(existing_occupancy[j + 1] + 7, 300)
+        S.Add(daily_occupancy[j] <= maxim)
+        S.Add(daily_occupancy[j] >= minim)
 
     S.EnableOutput()
-    S.set_time_limit(7000*3600)
+    S.set_time_limit(800*3600)
 
     valid_solution = []
     for family in range(N_FAMILIES):
@@ -267,7 +270,7 @@ if __name__ == '__main__' :
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
     initial_data = return_family_data()
-    existing_prediction = load_solution_data('new\\try_mixed_.csv')
+    existing_prediction = load_solution_data('submission_71342.94_BASE.csv')
     daily_load = compute_daily_load(existing_prediction, initial_data)
 
     prediction = solveSantaLP(daily_load, existing_prediction)
@@ -280,7 +283,7 @@ if __name__ == '__main__' :
 
     sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
     sub['assigned_day'] = prediction+1
-    sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\new\\try_mixed_.csv', index=False)
+    sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\new\\try_mixed_1_1.1h.csv', index=False)
 
     print('GAHGS {}, {:.0f}'.format(penalty.sum(), accounting_cost.sum()))
 

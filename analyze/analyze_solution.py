@@ -61,7 +61,7 @@ def compute_daily_load(solution, initial_data):
     row = 0
     while row < solution.shape[0]:
         day = solution.iloc[row, 0]
-        n_people = initial_data.iloc[row, 10]
+        n_people = initial_data.iloc[row, 11]
         days_load[int(day)] += n_people
         row += 1
     print(" sum of all people is :" + str(np.sum(days_load)))
@@ -140,24 +140,25 @@ def get_choice_cost(solution, initial_data):
 
 
 def get_choice_cost_per_family(solution, initial_data):
-    days_cost = np.zeros(101)
-    row = 0
-    while row < solution.shape[0]:
-        family_size = initial_data.iloc[row, 11]
+    families_cost = np.zeros(101)
+    family = 0
+    while family < solution.shape[0]:
+        family_size = initial_data.iloc[family, 11]
         try:
-            day = solution.iloc[row, 0]
+            day = solution.iloc[family, 0]
         except:
-            day = solution[row]
+            day = solution[family]
 
         choice = 9
         for i in range(1, 10):
-            if initial_data.iloc[row, i] == day:
+            if initial_data.iloc[family, i] == day:
                 choice = i - 1
+                break
         if choice > 0:
-            days_cost[int(day)] += get_cost_by_choice(family_size)[1][choice-1]
-        row += 1
+            families_cost[int(day)] += get_cost_by_choice(family_size)[1][choice-1]
+        family += 1
 
-    return days_cost
+    return families_cost
 
 
 def get_total_accounting_cost(daily_occupancy):
@@ -211,24 +212,15 @@ def get_accounting_cost_per_day(daily_occupancy):
 if __name__ == "__main__":
     initial_data = return_family_data()
 
-    # solution = load_solution_data('submission_76101.75179796087.csv')
-    solution = load_solution_data('submission_71342.94_BASE.csv')
-    # solution = load_solution_data('sample_submission_output_test.csv')
-    # solution = load_solution_data('sample_submission_output55_76448_submit.csv')
-
-    #daily_load = plot_daily_load(compute_daily_load(solution, initial_data))
+    solution = load_solution_data('submission_69858.95.csv')
     daily_load = compute_daily_load_2(solution, initial_data)
-
-    #choice_cost = plot_choice_cost(get_choice_cost(solution, initial_data))
     choice_cost = np.sum(get_choice_cost(solution, initial_data))
-
     accounting_cost = get_total_accounting_cost(daily_load)
 
     acc_cost = get_accounting_cost_per_day(daily_load)
-    # plot_accounting_cost(acc_cost)
+    ch_cost_per_fam = get_choice_cost_per_family(solution, initial_data)
 
     choices = calculate_choice_id_per_family(solution, initial_data)
-
 
     print('statistics per choice ' + str(np.unique(choices, return_counts=True)))
 
