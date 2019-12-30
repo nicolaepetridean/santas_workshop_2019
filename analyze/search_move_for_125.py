@@ -25,7 +25,7 @@ def return_family_data():
     return df
 
 
-def load_solution_data(solution_file = "sample_submission_output_fix.csv"):
+def load_solution_data(solution_file = "submission_on_jump_69773.15089972487.csv"):
     data_load = santa.SantaDataLoad()
     df = data_load.load_solution_file("D:\\jde\\projects\\santas_workshop_2019\\santadata\\" + solution_file)
     return df
@@ -71,34 +71,6 @@ def compute_daily_load(solution, initial_data):
     return days_load
 
 
-def compute_daily_load_2(solution, initial_data):
-    days_load = np.zeros(101)
-    row = 0
-    while row < solution.shape[0]:
-        day = solution.iloc[row, 0]
-        n_people = initial_data.iloc[row, 11]
-        days_load[int(day)] += n_people
-        row += 1
-    print(" sum of all people is :" + str(np.sum(days_load)))
-    print(" min of all days is :" + str(np.min(days_load)))
-    print(" max of all days is :" + str(np.max(days_load)))
-
-    return days_load
-
-
-# def plot_daily_load(days_load):
-#     plt.figure(figsize=(34, 50))
-#     newdf = pd.DataFrame(days_load)
-#     ax = sns.barplot(x=newdf.index, y=np.concatenate(newdf.values))
-#     ax.set_ylim(0, 1.1 * 1000)
-#     plt.xlabel('day', fontsize=14)
-#     plt.ylabel('Count', fontsize=14)
-#     plt.title('Day Load', fontsize=20)
-#     plt.show()
-#
-#     return days_load
-
-
 def calculate_choice_id_per_family(solution, initial_data):
     family_choice_ids = np.zeros(5000)
     row = 0
@@ -137,28 +109,6 @@ def get_choice_cost(solution, initial_data):
         row += 1
 
     return days_cost
-
-
-def get_choice_cost_per_family(solution, initial_data):
-    families_cost = np.zeros(101)
-    family = 0
-    while family < solution.shape[0]:
-        family_size = initial_data.iloc[family, 11]
-        try:
-            day = solution.iloc[family, 0]
-        except:
-            day = solution[family]
-
-        choice = 9
-        for i in range(1, 10):
-            if initial_data.iloc[family, i] == day:
-                choice = i - 1
-                break
-        if choice > 0:
-            families_cost[int(day)] += get_cost_by_choice(family_size)[1][choice-1]
-        family += 1
-
-    return families_cost
 
 
 def get_total_accounting_cost(daily_occupancy):
@@ -212,20 +162,50 @@ def get_accounting_cost_per_day(daily_occupancy):
 if __name__ == "__main__":
     initial_data = return_family_data()
 
-    solution = load_solution_data('submission_on_jump_69819.54267922124.csv')
-    daily_load = compute_daily_load_2(solution, initial_data)
-    choice_cost = np.sum(get_choice_cost(solution, initial_data))
-    accounting_cost = get_total_accounting_cost(daily_load)
+    solution = load_solution_data('submission_on_jump_69773.15089972487.csv')
 
-    acc_cost = get_accounting_cost_per_day(daily_load)
-    ch_cost_per_fam = get_choice_cost_per_family(solution, initial_data)
+    print('total INITIAL cost would be' + str(np.sum(get_choice_cost(np.ndarray.flatten(np.array(solution)), initial_data))))
+
+    daily_load = compute_daily_load(solution, initial_data)
+    acc_cost = get_total_accounting_cost(daily_load)
+    print('total acc cost would be' + str(acc_cost))
 
     choices = calculate_choice_id_per_family(solution, initial_data)
 
-    print('statistics per choice ' + str(np.unique(choices, return_counts=True)))
+    ii = 0
+    size = 2
+    candidates = []
+    not_done = True
+    to_stay = []
+    to_stay_size = []
+    while ii < solution.shape[0]:
+        if solution.iloc[ii]['assigned_day'] == 37:
+            candidates.append(ii)
+        ii += 1
+    size = 4
+    while not_done:
+        for room in candidates:
+            if room not in to_stay and np.sum(to_stay_size) <= 123:
+                if (123 - np.sum(to_stay_size) >= initial_data.iloc[room, 11]):
+                    to_stay.append(room)
+                    to_stay_size.append(initial_data.iloc[room, 11])
+                if 125 - np.sum(to_stay_size) == initial_data.iloc[room, 11]:
+                    to_stay.append(room)
+                    to_stay_size.append(initial_data.iloc[room, 11])
+        if np.sum(to_stay_size) >= 120:
+            not_done = False
 
-    print('accounting cost :' + str(accounting_cost))
-    print('choice_cost :' + str(choice_cost))
+    to_move = []
+    for item in candidates:
+        if item not in to_stay:
+            to_move.append(item)
 
-    print('total_cost' + str(choice_cost+accounting_cost))
+    for item in to_move:
+        for ch in range(1, 6):
+            if initial_data.iloc[item, ch] != 37 and daily_load[initial_data.iloc[item, ch]] + initial_data.iloc[item, ch] < 300:
+                solution.iloc[item]['assigned_day'] = initial_data.iloc[item, ch]
 
+    sub = pd.DataFrame(range(5000), columns=['family_id'])
+    sub['assigned_day'] = solution['assigned_day']
+    sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\move_125_30.csv',
+               index=False)

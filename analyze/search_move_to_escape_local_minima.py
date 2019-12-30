@@ -25,7 +25,7 @@ def return_family_data():
     return df
 
 
-def load_solution_data(solution_file = "sample_submission_output_fix.csv"):
+def load_solution_data(solution_file = "submission_on_jump_69773.15089972487.csv"):
     data_load = santa.SantaDataLoad()
     df = data_load.load_solution_file("D:\\jde\\projects\\santas_workshop_2019\\santadata\\" + solution_file)
     return df
@@ -162,7 +162,7 @@ def get_accounting_cost_per_day(daily_occupancy):
 if __name__ == "__main__":
     initial_data = return_family_data()
 
-    solution = load_solution_data('new\submission_mixed_5_iter_23076_score_71442.45747120796_.csv')
+    solution = load_solution_data('submission_on_jump_69773.15089972487.csv')
 
     print('total INITIAL cost would be' + str(np.sum(get_choice_cost(np.ndarray.flatten(np.array(solution)), initial_data))))
 
