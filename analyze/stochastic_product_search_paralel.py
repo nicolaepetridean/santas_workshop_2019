@@ -238,7 +238,7 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
     SCHUFFLE_list_loc = SCHUFFLE_list
 
     last_change = 0
-    best_ever = 69826.16
+    best_ever = 69523.26
 
     for i in range(n_iter):
         if n_iter > 100:
@@ -262,7 +262,7 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
                         best_ever = new_score
                         sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
                         sub['assigned_day'] = best + 1
-                        sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\submission_on_jump_' + str(
+                        sub.to_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/submission_on_jump_' + str(
                             best_score) + '.csv', index=False)
                     last_change = 0
 
@@ -351,7 +351,7 @@ if __name__ == '__main__' :
     MAX_OCCUPANCY = 300
     MIN_OCCUPANCY = 125
 
-    data = pd.read_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\family_data.csv', index_col='family_id')
+    data = pd.read_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/family_data.csv', index_col='family_id')
 
     FAMILY_SIZE = data.n_people.values
     DESIRED     = data.values[:, :-1] - 1
@@ -359,7 +359,7 @@ if __name__ == '__main__' :
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('move_125_.csv')
+    prediction = load_solution_data('submission_on_jump_69520.25354352653.csv')
 
     prediction = prediction['assigned_day'].to_numpy()
     prediction = prediction - 1
@@ -368,7 +368,7 @@ if __name__ == '__main__' :
 
     iteration = 1
 
-    fam_size_out = 4
+    fam_size_out = 5
     n_iter = 8000000
 
     initial_data = return_family_data()
@@ -383,12 +383,12 @@ if __name__ == '__main__' :
                 n_iter=n_iter,
                 verbose=1000,
                 verbose2=1000,
-                random_state=3079,
+                random_state=2023,
                 )
 
         prediction = final
 
         sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
         sub['assigned_day'] = final + 1
-        sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\submission_on_jump_' + str(fam_size_out) + '.csv', index=False)
+        sub.to_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/santadata/submission_on_jump_' + str(fam_size_out) + '.csv', index=False)
         fam_size_out -= 1
