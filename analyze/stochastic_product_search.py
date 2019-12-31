@@ -253,14 +253,14 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
 
             new_score, new_acc, new_pen_cost = cost_function(new)
 
-            if new_score < best_score or (last_change > 2999 and 0 < int(new_score - best_score) <= 10):
+            if new_score < best_score or (last_change > 1999 and 0 < int(new_score - best_score) <= 10):
                     best_score = new_score
                     best = new
                     if new_score < best_ever:
                         best_ever = new_score
                         sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
                         sub['assigned_day'] = best + 1
-                        sub.to_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/submission_on_69_' + str(
+                        sub.to_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/submission_on_mip_' + str(
                             best_score) + '.csv', index=False)
                     last_change = 0
 
@@ -357,7 +357,7 @@ if __name__ == '__main__' :
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('move_125_day_69.csv')
+    prediction = load_solution_data('move_125_day_50.csv')
 
     prediction = prediction['assigned_day'].to_numpy()
     prediction = prediction - 1
@@ -381,12 +381,12 @@ if __name__ == '__main__' :
                 n_iter=n_iter,
                 verbose=1000,
                 verbose2=1000,
-                random_state=8971,
+                random_state=6575,
                 )
 
         prediction = final
 
         sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
         sub['assigned_day'] = final + 1
-        sub.to_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/santadata/submission_on_69_' + str(fam_size_out) + '.csv', index=False)
+        sub.to_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/santadata/submission_on_mip_' + str(fam_size_out) + '.csv', index=False)
         fam_size_out -= 1

@@ -162,7 +162,7 @@ def get_accounting_cost_per_day(daily_occupancy):
 if __name__ == "__main__":
     initial_data = return_family_data()
 
-    solution = load_solution_data('submission_on_jump_69377.63940912219.csv')
+    solution = load_solution_data('submission_on_jump_69366.35788195278.csv')
 
     print('total INITIAL cost would be' + str(np.sum(get_choice_cost(np.ndarray.flatten(np.array(solution)), initial_data))))
 
@@ -179,7 +179,7 @@ if __name__ == "__main__":
     to_stay = []
     to_stay_size = []
     while ii < solution.shape[0]:
-        if solution.iloc[ii]['assigned_day'] == 69:
+        if solution.iloc[ii]['assigned_day'] == 50:
             candidates.append(ii)
         ii += 1
 
@@ -208,10 +208,10 @@ if __name__ == "__main__":
 
     for item in to_move:
         for ch in range(1, 6):
-            if initial_data.iloc[item, ch] != 69 and daily_load[initial_data.iloc[item, ch]] + initial_data.iloc[item, 11] < 300:
+            if initial_data.iloc[item, ch] != 50 and daily_load[initial_data.iloc[item, ch]] + initial_data.iloc[item, 11] < 300:
                 solution.iloc[item]['assigned_day'] = initial_data.iloc[item, ch]
 
     sub = pd.DataFrame(range(5000), columns=['family_id'])
     sub['assigned_day'] = solution['assigned_day']
-    sub.to_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/move_125_day_69.csv',
+    sub.to_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/move_125_day_50.csv',
                index=False)
