@@ -238,11 +238,11 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
     SCHUFFLE_list_loc = SCHUFFLE_list
 
     last_change = 0
-    best_ever = 69366.36
+    best_ever = 69357.63
 
     for i in range(n_iter):
         if n_iter > 100:
-            fam_size = np.random.choice([3,4,5,6,7], size=1)[0]
+            fam_size = np.random.choice([3,4,5,6], size=1)[0]
             top_k = np.random.choice([2,3], size=1)[0]
         fam_indices = np.random.choice(SCHUFFLE_list_loc, size=fam_size)
         changes = np.array(list(product(*DESIRED[fam_indices, top_k_jump:top_k].tolist())))
@@ -253,7 +253,7 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
 
             new_score, new_acc, new_pen_cost = cost_function(new)
 
-            if new_score < best_score or (last_change > 3999 and 0 < int(new_score - best_score) <= 19):
+            if new_score < best_score or (last_change > 2199 and 0 < int(new_score - best_score) <= 10):
                     best_score = new_score
                     best = new
                     if new_score < best_ever:
@@ -357,7 +357,7 @@ if __name__ == '__main__' :
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('submission_on_mip_69357.62369291829.csv')
+    prediction = load_solution_data('try_mixed_with_diff.csv')
 
     prediction = prediction['assigned_day'].to_numpy()
     prediction = prediction - 1
@@ -367,7 +367,7 @@ if __name__ == '__main__' :
     iteration = 1
 
     fam_size_out = 5
-    n_iter = 8000000
+    n_iter = 6000000
 
     initial_data = return_family_data()
     #prediction, SCHUFFLE_list = make_a_move(prediction)
@@ -381,7 +381,7 @@ if __name__ == '__main__' :
                 n_iter=n_iter,
                 verbose=1000,
                 verbose2=1000,
-                random_state=9999,
+                random_state=4419,
                 )
 
         prediction = final
