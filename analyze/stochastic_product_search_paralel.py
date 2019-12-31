@@ -238,7 +238,7 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
     SCHUFFLE_list_loc = SCHUFFLE_list
 
     last_change = 0
-    best_ever = 69470.74
+    best_ever = 69383.38
 
     for i in range(n_iter):
         if n_iter > 100:
@@ -253,10 +253,8 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
 
             new_score, new_acc, new_pen_cost = cost_function(new)
 
-            if new_score < best_score or (last_change > 2999 and 0 < int(new_score - best_score) <= 10):
+            if new_score < best_score or (last_change > 2099 and 0 < int(new_score - best_score) <= 10):
                     best_score = new_score
-                    acc_cost = new_acc
-                    pen_cost = new_pen_cost
                     best = new
                     if new_score < best_ever:
                         best_ever = new_score
@@ -359,7 +357,7 @@ if __name__ == '__main__' :
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('try_mixed_with_diff.csv')
+    prediction = load_solution_data('submission_on_jump_69383.37737559064.csv')
 
     prediction = prediction['assigned_day'].to_numpy()
     prediction = prediction - 1
@@ -383,7 +381,7 @@ if __name__ == '__main__' :
                 n_iter=n_iter,
                 verbose=1000,
                 verbose2=1000,
-                random_state=4915,
+                random_state=7917,
                 )
 
         prediction = final
