@@ -5,7 +5,7 @@ import pandas as pd
 import analyze.load_santa_data as santa
 
 
-data = pd.read_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\family_data.csv', index_col='family_id')
+data = pd.read_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/family_data.csv', index_col='family_id')
 
 cols = [f'choice_{i}' for i in range(10)]
 choice_dict = data[cols].to_dict()
@@ -21,13 +21,13 @@ family_size_dict = data[['n_people']].to_dict()['n_people']
 
 def return_family_data():
     data_load = santa.SantaDataLoad()
-    df = data_load.load_family_initial_data("D:\\jde\\projects\\santas_workshop_2019\\santadata\\")
+    df = data_load.load_family_initial_data("/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata")
     return df
 
 
 def load_solution_data(solution_file = "sample_submission_output_fix.csv"):
     data_load = santa.SantaDataLoad()
-    df = data_load.load_solution_file("D:\\jde\\projects\\santas_workshop_2019\\santadata\\" + solution_file)
+    df = data_load.load_solution_file("/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/" + solution_file)
     return df
 
 
@@ -193,7 +193,7 @@ def get_choice_distribution_vs_family_size(solution, initial_data):
 if __name__ == "__main__":
     initial_data = return_family_data()
 
-    solution = load_solution_data('submission_on_jump_69773.15089972487.csv')
+    solution = load_solution_data('submission_on_jump_69443.127317698.csv')
 
     daily_load = compute_daily_load(solution, initial_data)
 
