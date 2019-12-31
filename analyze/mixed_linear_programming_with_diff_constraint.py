@@ -224,7 +224,7 @@ def solveSantaLP(existing_occupancy, existing_prediction):
     for j in range(N_DAYS):
         minim = max(existing_occupancy[j + 1], 125)
         maxim = min(existing_occupancy[j + 1], 300)
-        if j not in [36, 43, 50, 57, 64, 71, 78, 85, 92, 99]:
+        if existing_occupancy[j+1] > 125:
             minim = max(existing_occupancy[j+1]-1, 125)
             maxim = min(existing_occupancy[j+1]+1, 300)
         S.Add(daily_occupancy[j] <= maxim)
@@ -279,7 +279,7 @@ if __name__ == '__main__' :
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
     initial_data = return_family_data()
-    existing_prediction = load_solution_data('submission_on_jump_69469.3540022548.csv')
+    existing_prediction = load_solution_data('submission_on_jump_69366.35788195278.csv')
     daily_load = compute_daily_load(existing_prediction, initial_data)
 
     prediction = solveSantaLP(daily_load, existing_prediction)

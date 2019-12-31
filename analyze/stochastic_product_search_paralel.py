@@ -357,7 +357,7 @@ if __name__ == '__main__' :
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('submission_on_jump_69383.37737559064.csv')
+    prediction = load_solution_data('submission_on_jump_69366.35788195278.csv')
 
     prediction = prediction['assigned_day'].to_numpy()
     prediction = prediction - 1
@@ -381,7 +381,7 @@ if __name__ == '__main__' :
                 n_iter=n_iter,
                 verbose=1000,
                 verbose2=1000,
-                random_state=7917,
+                random_state=9153,
                 )
 
         prediction = final

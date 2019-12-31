@@ -253,7 +253,7 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
 
             new_score, new_acc, new_pen_cost = cost_function(new)
 
-            if new_score < best_score or (last_change > 1999 and 0 < int(new_score - best_score) <= 10):
+            if new_score < best_score or (last_change > 2999 and 0 < int(new_score - best_score) <= 10):
                     best_score = new_score
                     best = new
                     if new_score < best_ever:
@@ -381,7 +381,7 @@ if __name__ == '__main__' :
                 n_iter=n_iter,
                 verbose=1000,
                 verbose2=1000,
-                random_state=1971,
+                random_state=8971,
                 )
 
         prediction = final
