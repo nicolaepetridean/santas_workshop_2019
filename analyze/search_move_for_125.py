@@ -5,7 +5,7 @@ import pandas as pd
 import analyze.load_santa_data as santa
 
 
-data = pd.read_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\family_data.csv', index_col='family_id')
+data = pd.read_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/family_data.csv', index_col='family_id')
 
 cols = [f'choice_{i}' for i in range(10)]
 choice_dict = data[cols].to_dict()
@@ -21,13 +21,13 @@ family_size_dict = data[['n_people']].to_dict()['n_people']
 
 def return_family_data():
     data_load = santa.SantaDataLoad()
-    df = data_load.load_family_initial_data("D:\\jde\\projects\\santas_workshop_2019\\santadata\\")
+    df = data_load.load_family_initial_data("/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/")
     return df
 
 
 def load_solution_data(solution_file = "submission_on_jump_69773.15089972487.csv"):
     data_load = santa.SantaDataLoad()
-    df = data_load.load_solution_file("D:\\jde\\projects\\santas_workshop_2019\\santadata\\" + solution_file)
+    df = data_load.load_solution_file("/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/" + solution_file)
     return df
 
 
@@ -179,7 +179,7 @@ if __name__ == "__main__":
     to_stay = []
     to_stay_size = []
     while ii < solution.shape[0]:
-        if solution.iloc[ii]['assigned_day'] == 37:
+        if solution.iloc[ii]['assigned_day'] == 57:
             candidates.append(ii)
         ii += 1
     size = 4
@@ -207,5 +207,5 @@ if __name__ == "__main__":
 
     sub = pd.DataFrame(range(5000), columns=['family_id'])
     sub['assigned_day'] = solution['assigned_day']
-    sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\move_125_30.csv',
+    sub.to_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/move_125_day_57.csv',
                index=False)
