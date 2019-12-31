@@ -253,7 +253,7 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
 
             new_score, new_acc, new_pen_cost = cost_function(new)
 
-            if new_score < best_score or (last_change > 1999 and 0 < int(new_score - best_score) <= 10):
+            if new_score < best_score or (last_change > 3999 and 0 < int(new_score - best_score) <= 19):
                     best_score = new_score
                     best = new
                     if new_score < best_ever:
@@ -357,7 +357,7 @@ if __name__ == '__main__' :
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('submission_on_jump_69366.35788195278.csv')
+    prediction = load_solution_data('submission_on_mip_69357.62369291829.csv')
 
     prediction = prediction['assigned_day'].to_numpy()
     prediction = prediction - 1
@@ -381,7 +381,7 @@ if __name__ == '__main__' :
                 n_iter=n_iter,
                 verbose=1000,
                 verbose2=1000,
-                random_state=3977,
+                random_state=9999,
                 )
 
         prediction = final
