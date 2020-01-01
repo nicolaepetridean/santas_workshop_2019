@@ -237,12 +237,12 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
     SCHUFFLE_list_loc = SCHUFFLE_list
 
     last_change = 0
-    best_ever = 69357.62
+    best_ever = 69280.75
 
     for i in range(n_iter):
-        # if n_iter > 100:
-        #     fam_size = np.random.choice([3,4,5,6,7], size=1)[0]
-        #     top_k = np.random.choice([2,3], size=1)[0]
+        if n_iter > 100:
+            fam_size = np.random.choice([3,4,5,6], size=1)[0]
+            top_k = np.random.choice([2,3], size=1)[0]
         fam_indices = np.random.choice(SCHUFFLE_list_loc, size=fam_size)
         changes = np.array(list(product(*DESIRED[fam_indices, top_k_jump:top_k].tolist())))
         last_change += 1
@@ -252,7 +252,8 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
 
             new_score, new_acc, new_pen_cost = cost_function(new)
 
-            if new_score < best_score or (last_change > 999 and 10 < int(new_score - best_score) <= 25):
+            if new_score < best_score or (last_change > 5999 and 0 < int(new_score - best_score) <= 12):
+                if new_score != best_ever:
                     best_score = new_score
                     best = new
                     if new_score < best_ever:
@@ -270,6 +271,7 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
             print(f"Iteration #{i}: Best score is {best_score:.2f}      ")
             print(f"Iteration #{i}: Last change is {last_change:.2f}      ")
             print(f"Iteration #{i}: new score is {new_score:.2f}      ")
+            print(f"Iteration #{i}: best ever score is {best_ever:.2f}      ")
             print(f"Iteration #{i}: family indices are {str(fam_indices)}      ")
 
     print(f"Final best score is {best_score:.2f}")
@@ -356,7 +358,7 @@ if __name__ == '__main__' :
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('submission_on_jump_69357.62369291829.csv')
+    prediction = load_solution_data('submission_on_mip_69254.5909915246.csv')
 
     prediction = prediction['assigned_day'].to_numpy()
     prediction = prediction - 1
@@ -365,8 +367,8 @@ if __name__ == '__main__' :
 
     iteration = 1
 
-    fam_size_out = 6
-    n_iter = 8000000
+    fam_size_out = 4
+    n_iter = 7000000
 
     initial_data = return_family_data()
     #prediction, SCHUFFLE_list = make_a_move(prediction)
@@ -374,13 +376,13 @@ if __name__ == '__main__' :
         # compute non zero choices
         final = stochastic_product_search(
                 top_k_jump=0,
-                top_k=3,
+                top_k=4,
                 fam_size=fam_size_out,
                 original=prediction,
                 n_iter=n_iter,
                 verbose=1000,
                 verbose2=1000,
-                random_state=7111,
+                random_state=4795,
                 )
 
         prediction = final
