@@ -357,7 +357,7 @@ if __name__ == '__main__' :
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('submission_on_jump_69263.6936114523.csv')
+    prediction = load_solution_data('try_mixed_with_diff.csv')
 
     prediction = prediction['assigned_day'].to_numpy()
     prediction = prediction - 1
@@ -367,7 +367,7 @@ if __name__ == '__main__' :
     iteration = 1
 
     fam_size_out = 5
-    n_iter = 6000000
+    n_iter = 7000000
 
     initial_data = return_family_data()
     #prediction, SCHUFFLE_list = make_a_move(prediction)
@@ -381,7 +381,7 @@ if __name__ == '__main__' :
                 n_iter=n_iter,
                 verbose=1000,
                 verbose2=1000,
-                random_state=4295,
+                random_state=4017,
                 )
 
         prediction = final
