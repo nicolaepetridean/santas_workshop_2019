@@ -5,7 +5,7 @@ from numba import njit
 from itertools import product
 import matplotlib.pylab as plt
 from ortools.linear_solver import pywraplp
-from analyze.analyze_solution import load_solution_data, calculate_choice_id_per_family, return_family_data, get_choice_cost, compute_daily_load
+from analyze.analyze_solution import load_solution_data, calculate_choice_id_per_family, return_family_data, get_choice_cost, compute_daily_load_2
 
 def get_penalty(n, choice):
     penalty = None
@@ -361,7 +361,7 @@ if __name__ == '__main__' :
     MAX_OCCUPANCY = 300
     MIN_OCCUPANCY = 125
 
-    data = pd.read_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\family_data.csv', index_col='family_id')
+    data = pd.read_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/family_data.csv', index_col='family_id')
 
     FAMILY_SIZE = data.n_people.values
     DESIRED     = data.values[:, :-1] - 1 #data[data.n_people < 7].values[:, :-1] - 1
@@ -369,14 +369,14 @@ if __name__ == '__main__' :
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('submission_71342.94_BASE.csv')
+    prediction = load_solution_data('submission_on_jump_69247.74599637784.csv')
 
-    daily_load = compute_daily_load(prediction, data)
+    daily_load = compute_daily_load_2(prediction, data)
     mix_pool = []
     for item in range(prediction.shape[0]):
         assigned_day = prediction['assigned_day'][item]
         ch0 = data.iloc[item, 0]
-        if data.iloc[item, 10] >= 7:
+        if data.iloc[item, 10] > 7:
             if daily_load[ch0] >= 298 and assigned_day == ch0:
                 mix_pool.append(item)
 
@@ -442,7 +442,7 @@ if __name__ == '__main__' :
     print('{}, {:.0f}'.format(penalty.sum(), accounting_cost.sum()))
 
     iteration = 1
-    fam_size_out = 8
+    fam_size_out = 5
     n_iter = 5000000
 
     initial_data = return_family_data()
@@ -451,7 +451,7 @@ if __name__ == '__main__' :
         #switch_candidates = famillies
         final = stochastic_product_search(
                 top_k_jump=0,
-                top_k=2,
+                top_k=3,
                 fam_size=fam_size_out,
                 original=prediction,
                 n_iter=n_iter,

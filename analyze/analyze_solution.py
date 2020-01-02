@@ -212,7 +212,7 @@ def get_accounting_cost_per_day(daily_occupancy):
 if __name__ == "__main__":
     initial_data = return_family_data()
 
-    solution = load_solution_data('submission_on_jump_69271.85543783382.csv')
+    solution = load_solution_data('try_mixed_with_diff_par_on.csv')
     daily_load = compute_daily_load_2(solution, initial_data)
     choice_cost = np.sum(get_choice_cost(solution, initial_data))
     accounting_cost = get_total_accounting_cost(daily_load)

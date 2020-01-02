@@ -225,32 +225,9 @@ def solveSantaLP(existing_occupancy, existing_prediction):
         minim = max(existing_occupancy[j + 1], 125)
         maxim = min(existing_occupancy[j + 1], 300)
         if existing_occupancy[j+1] > 125:
-            minim = max(existing_occupancy[j+1]-2, 125)
+            minim = max(existing_occupancy[j+1]-1, 125)
             maxim = min(existing_occupancy[j+1]+1, 300)
-        if j == 30:
-            minim = 275
-            maxim = min(existing_occupancy[j+1]+2, 300)
-        if j == 37:
-            minim = 273
-            maxim = min(existing_occupancy[j+1]+2, 300)
-        if j == 44:
-            minim = 295
-            maxim = min(existing_occupancy[j+1]+2, 300)
-        if j == 51:
-            minim = 286
-            maxim = min(existing_occupancy[j+1]+2, 300)
-        if j == 58:
-            minim = 262
-            maxim = min(existing_occupancy[j+1]+2, 300)
-        if j == 65:
-            minim = 245
-            maxim = min(existing_occupancy[j+1]+2, 300)
-        if j == 72:
-            minim = 225
-            maxim = min(existing_occupancy[j+1]+2, 300)
-        if j == 79:
-            minim = 226
-            maxim = min(existing_occupancy[j+1]+2, 300)
+
         S.Add(daily_occupancy[j] <= maxim)
         S.Add(daily_occupancy[j] >= minim)
 
@@ -261,7 +238,7 @@ def solveSantaLP(existing_occupancy, existing_prediction):
         #     S.Add(daily_occupancy[d+1]-daily_occupancy[d] <= (existing_occupancy[d+1]-existing_occupancy[d] + 1))
 
     S.EnableOutput()
-    S.set_time_limit(490*3600)
+    S.set_time_limit(560*3600)
 
     valid_solution = []
     for family in range(N_FAMILIES):
@@ -303,7 +280,7 @@ if __name__ == '__main__' :
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
     initial_data = return_family_data()
-    existing_prediction = load_solution_data('submission_on_jump_69247.74599637784.csv')
+    existing_prediction = load_solution_data('try_mixed_with_diff_par_on.csv')
     daily_load = compute_daily_load(existing_prediction, initial_data)
 
     prediction = solveSantaLP(daily_load, existing_prediction)
@@ -316,7 +293,7 @@ if __name__ == '__main__' :
 
     sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
     sub['assigned_day'] = prediction+1
-    sub.to_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/try_mixed_with_diff.csv', index=False)
+    sub.to_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/try_mixed_with_diff_par_on.csv', index=False)
 
     print('GAHGS {}, {:.0f}'.format(penalty.sum(), accounting_cost.sum()))
 

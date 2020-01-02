@@ -193,7 +193,7 @@ def get_choice_distribution_vs_family_size(solution, initial_data):
 if __name__ == "__main__":
     initial_data = return_family_data()
 
-    solution = load_solution_data('submission_on_jump_69272.97671728134.csv')
+    solution = load_solution_data('try_mixed_with_diff32.csv')
 
     daily_load = compute_daily_load(solution, initial_data)
 

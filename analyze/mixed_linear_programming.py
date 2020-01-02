@@ -222,13 +222,23 @@ def solveSantaLP(existing_occupancy, existing_prediction):
         S.Add(family_presence[i] == 1)
 
     for j in range(N_DAYS):
-        minim = max(existing_occupancy[j+1]-7, 125)
-        maxim = min(existing_occupancy[j + 1] + 7, 300)
+        minim = max(existing_occupancy[j + 1], 125)
+        maxim = min(existing_occupancy[j + 1], 300)
+        if existing_occupancy[j+1] > 125:
+            minim = max(existing_occupancy[j+1]-3, 125)
+            maxim = min(existing_occupancy[j+1]+2, 300)
+
         S.Add(daily_occupancy[j] <= maxim)
         S.Add(daily_occupancy[j] >= minim)
 
+    # for d in range(N_DAYS - 1):
+    #     S.Add(daily_occupancy[d]-daily_occupancy[d+1] <= existing_occupancy[d] - existing_occupancy[d+1] + 1)
+        #S.Add(daily_occupancy[d+1]-daily_occupancy[d] <= existing_occupancy[d+1] - existing_occupancy[d] + 1)
+        # else:
+        #     S.Add(daily_occupancy[d+1]-daily_occupancy[d] <= (existing_occupancy[d+1]-existing_occupancy[d] + 1))
+
     S.EnableOutput()
-    S.set_time_limit(800*3600)
+    S.set_time_limit(160*3600)
 
     valid_solution = []
     for family in range(N_FAMILIES):
@@ -262,7 +272,7 @@ if __name__ == '__main__' :
     MAX_OCCUPANCY = 300
     MIN_OCCUPANCY = 125
 
-    data = pd.read_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\family_data.csv', index_col='family_id')
+    data = pd.read_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/family_data.csv', index_col='family_id')
 
     FAMILY_SIZE = data.n_people.values
     DESIRED     = data.values[:, :-1] - 1
@@ -270,7 +280,7 @@ if __name__ == '__main__' :
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
     initial_data = return_family_data()
-    existing_prediction = load_solution_data('submission_71342.94_BASE.csv')
+    existing_prediction = load_solution_data('submission_on_jump_69255.28873114767.csv')
     daily_load = compute_daily_load(existing_prediction, initial_data)
 
     prediction = solveSantaLP(daily_load, existing_prediction)
@@ -283,7 +293,7 @@ if __name__ == '__main__' :
 
     sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
     sub['assigned_day'] = prediction+1
-    sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\new\\try_mixed_1_1.1h.csv', index=False)
+    sub.to_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/try_mixed_with_diff_par.csv', index=False)
 
     print('GAHGS {}, {:.0f}'.format(penalty.sum(), accounting_cost.sum()))
 
