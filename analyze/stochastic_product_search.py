@@ -250,9 +250,11 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
 
             new_score, new_acc, new_pen_cost = cost_function(new)
 
-            if new_score < best_score or (last_change > 220 and 0 < int(new_score - best_score) <= 8):
+            if new_score < best_score or (last_change > 170 and 0 < int(new_score - best_score) <= 9):
                 best_score = new_score
                 best = new
+                random_state = i
+                np.random.seed(random_state)
                 if new_score < best_ever:
                     best_ever = new_score
                     sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
@@ -363,7 +365,7 @@ if __name__ == '__main__' :
 
     iteration = 1
 
-    fam_size_out = 4
+    fam_size_out = 6
     n_iter = 13000000
 
     initial_data = return_family_data()
@@ -378,7 +380,7 @@ if __name__ == '__main__' :
                 n_iter=n_iter,
                 verbose=1000,
                 verbose2=500,
-                random_state=4679,
+                random_state=4630,
                 )
         prediction = final
 

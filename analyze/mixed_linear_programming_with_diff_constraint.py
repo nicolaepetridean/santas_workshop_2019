@@ -225,14 +225,14 @@ def solveSantaLP(existing_occupancy, existing_prediction):
         minim = max(existing_occupancy[j + 1], 125)
         maxim = min(existing_occupancy[j + 1], 300)
         if existing_occupancy[j+1] > 125:
-            minim = max(existing_occupancy[j+1]-1, 125)
+            minim = max(existing_occupancy[j+1]-2, 125)
             maxim = min(existing_occupancy[j+1]+1, 300)
 
         S.Add(daily_occupancy[j] <= maxim)
         S.Add(daily_occupancy[j] >= minim)
 
     S.EnableOutput()
-    S.set_time_limit(1600*3600)
+    S.set_time_limit(700*3600)
 
     valid_solution = []
     for family in range(N_FAMILIES):
