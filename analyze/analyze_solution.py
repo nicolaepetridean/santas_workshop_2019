@@ -213,6 +213,7 @@ if __name__ == "__main__":
     initial_data = return_family_data()
 
     solution = load_solution_data('submission_on_jump_69227.33085629047.csv')
+
     daily_load = compute_daily_load_2(solution, initial_data)
     choice_cost = np.sum(get_choice_cost(solution, initial_data))
     accounting_cost = get_total_accounting_cost(daily_load)
