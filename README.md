@@ -1,6 +1,8 @@
 # santas_workshop_2019
 personal solution for https://www.kaggle.com/c/santa-workshop-tour-2019/overview
 
+This is a bronze medal solution.
+
 Your task is to schedule the families to Santa's Workshop in a way that
 minimizes the penalty cost to Santa (as described on the Evaluation page).
 
