@@ -242,6 +242,9 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
     last_switch = 0
 
     for i in range(n_iter):
+        if n_iter > 100:
+            fam_size = np.random.choice([3,4,5,6], size=1)[0]
+            top_k = np.random.choice([2,3], size=1)[0]
         last_switch += 1
         candiates_fam_indices = np.random.choice((switch_candidates), size=fam_size-1)
         # fam_size = np.random.choice(range(4, init_fam_size), size=1)[0]

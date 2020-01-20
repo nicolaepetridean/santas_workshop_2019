@@ -5,7 +5,12 @@ from numba import njit
 from itertools import product
 import matplotlib.pylab as plt
 from ortools.linear_solver import pywraplp
-from analyze.analyze_solution import load_solution_data, return_family_data, compute_daily_load
+from analyze.analyze_solution import load_solution_data, return_family_data, compute_daily_load, load_occupancy_data
+
+from __future__ import print_function
+import mosek
+from mosek.fusion import *
+import sys
 
 def get_penalty(n, choice):
     penalty = None
@@ -224,15 +229,23 @@ def solveSantaLP(existing_occupancy, existing_prediction):
     for j in range(N_DAYS):
         minim = max(existing_occupancy[j + 1], 125)
         maxim = min(existing_occupancy[j + 1], 300)
-        if existing_occupancy[j+1] > 125:
-            minim = max(existing_occupancy[j+1]-2, 125)
-            maxim = min(existing_occupancy[j+1]+1, 300)
+        # if existing_occupancy[j+1] > 125:
+        #     minim = max(existing_occupancy[j+1]-3, 125)
+        #     maxim = min(existing_occupancy[j+1]+2, 300)
+        #
+        # if 125 < existing_occupancy[j+1] < 128:
+        #     minim = 125
+        #     maxim = existing_occupancy[j+1]
+        #
+        # if j in [3, 10, 17, 24, 31, 38, 45]:
+        #     minim = max(existing_occupancy[j + 1], 125)
+        #     maxim = min(existing_occupancy[j + 1] + 2, 300)
 
         S.Add(daily_occupancy[j] <= maxim)
         S.Add(daily_occupancy[j] >= minim)
 
     S.EnableOutput()
-    S.set_time_limit(700*3600)
+    S.set_time_limit(500*3600)
 
     valid_solution = []
     for family in range(N_FAMILIES):
@@ -266,7 +279,7 @@ if __name__ == '__main__' :
     MAX_OCCUPANCY = 300
     MIN_OCCUPANCY = 125
 
-    data = pd.read_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\family_data.csv', index_col='family_id')
+    data = pd.read_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/family_data.csv', index_col='family_id')
 
     FAMILY_SIZE = data.n_people.values
     DESIRED     = data.values[:, :-1] - 1
@@ -274,10 +287,13 @@ if __name__ == '__main__' :
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
     initial_data = return_family_data()
-    existing_prediction = load_solution_data('submission_on_jump_69227.33085629047.csv')
+    existing_prediction = load_solution_data('sample_submission_69185.csv')
     daily_load = compute_daily_load(existing_prediction, initial_data)
 
-    prediction = solveSantaLP(daily_load, existing_prediction)
+    daily_load_idea = load_occupancy_data()
+    #accounting_cost = get_total_accounting_cost(daily_load_idea)
+
+    prediction = solveSantaLP(daily_load_idea, existing_prediction)
     penalty, accounting_cost, n_out_of_range, occupancy = cost_stats(prediction)
     print(penalty.sum(), accounting_cost.sum(), n_out_of_range, occupancy.min(), occupancy.max())
     #
@@ -287,7 +303,7 @@ if __name__ == '__main__' :
 
     sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
     sub['assigned_day'] = prediction+1
-    sub.to_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\try_mixed_with_246.csv', index=False)
+    sub.to_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/try_mixed_with_6020.csv', index=False)
 
     print('GAHGS {}, {:.0f}'.format(penalty.sum(), accounting_cost.sum()))
 

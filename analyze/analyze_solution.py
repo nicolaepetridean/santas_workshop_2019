@@ -3,9 +3,10 @@ import matplotlib.pyplot as plt
 import pandas as pd
 # import seaborn as sns
 import analyze.load_santa_data as santa
+import os
 
 
-data = pd.read_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\family_data.csv', index_col='family_id')
+data = pd.read_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/family_data.csv', index_col='family_id')
 
 cols = [f'choice_{i}' for i in range(10)]
 choice_dict = data[cols].to_dict()
@@ -21,15 +22,18 @@ family_size_dict = data[['n_people']].to_dict()['n_people']
 
 def return_family_data():
     data_load = santa.SantaDataLoad()
-    df = data_load.load_family_initial_data("D:\\jde\\projects\\santas_workshop_2019\\santadata\\")
+    df = data_load.load_family_initial_data("/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/")
     return df
 
 
 def load_solution_data(solution_file = "sample_submission_output_fix.csv"):
     data_load = santa.SantaDataLoad()
-    df = data_load.load_solution_file("D:\\jde\\projects\\santas_workshop_2019\\santadata\\" + solution_file)
+    df = data_load.load_solution_file("/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/" + solution_file)
     return df
 
+def load_occupancy_data(solution_file = "occ_2_.csv"):
+    occ = pd.read_csv("/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/" + solution_file, header=None, usecols=[0,1])[1]
+    return np.concatenate(([0], np.array(occ)))
 
 def return_family_sizes(df):
     return list(df['n_people'])
@@ -84,19 +88,6 @@ def compute_daily_load_2(solution, initial_data):
     print(" max of all days is :" + str(np.max(days_load)))
 
     return days_load
-
-
-# def plot_daily_load(days_load):
-#     plt.figure(figsize=(34, 50))
-#     newdf = pd.DataFrame(days_load)
-#     ax = sns.barplot(x=newdf.index, y=np.concatenate(newdf.values))
-#     ax.set_ylim(0, 1.1 * 1000)
-#     plt.xlabel('day', fontsize=14)
-#     plt.ylabel('Count', fontsize=14)
-#     plt.title('Day Load', fontsize=20)
-#     plt.show()
-#
-#     return days_load
 
 
 def calculate_choice_id_per_family(solution, initial_data):
@@ -212,7 +203,10 @@ def get_accounting_cost_per_day(daily_occupancy):
 if __name__ == "__main__":
     initial_data = return_family_data()
 
-    solution = load_solution_data('submission_on_jump_69227.33085629047.csv')
+    solution = load_solution_data('submission_on_mip_lst_69267.78950400071.csv')
+
+    # daily_load_idea = load_occupancy_data()
+    # accounting_cost = get_total_accounting_cost(daily_load_idea)
 
     daily_load = compute_daily_load_2(solution, initial_data)
     choice_cost = np.sum(get_choice_cost(solution, initial_data))

@@ -225,11 +225,12 @@ def solveSantaLP(existing_occupancy, existing_prediction):
         minim = max(existing_occupancy[j + 1], 125)
         maxim = min(existing_occupancy[j + 1], 300)
         if existing_occupancy[j+1] > 125:
-            minim = max(existing_occupancy[j+1]-3, 125)
-            maxim = min(existing_occupancy[j+1]+2, 300)
+            minim = max(existing_occupancy[j+1]-1, 125)
+            maxim = min(existing_occupancy[j+1]+1, 300)
 
         S.Add(daily_occupancy[j] <= maxim)
         S.Add(daily_occupancy[j] >= minim)
+        #S.Add(daily_occupancy[j] == existing_occupancy[j + 1])
 
     # for d in range(N_DAYS - 1):
     #     S.Add(daily_occupancy[d]-daily_occupancy[d+1] <= existing_occupancy[d] - existing_occupancy[d+1] + 1)
@@ -238,7 +239,7 @@ def solveSantaLP(existing_occupancy, existing_prediction):
         #     S.Add(daily_occupancy[d+1]-daily_occupancy[d] <= (existing_occupancy[d+1]-existing_occupancy[d] + 1))
 
     S.EnableOutput()
-    S.set_time_limit(160*3600)
+    S.set_time_limit(2000*3600)
 
     valid_solution = []
     for family in range(N_FAMILIES):
@@ -280,7 +281,7 @@ if __name__ == '__main__' :
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
     initial_data = return_family_data()
-    existing_prediction = load_solution_data('submission_on_jump_69255.28873114767.csv')
+    existing_prediction = load_solution_data('sample_submission_69194.csv')
     daily_load = compute_daily_load(existing_prediction, initial_data)
 
     prediction = solveSantaLP(daily_load, existing_prediction)
@@ -293,7 +294,7 @@ if __name__ == '__main__' :
 
     sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
     sub['assigned_day'] = prediction+1
-    sub.to_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/try_mixed_with_diff_par.csv', index=False)
+    sub.to_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/try_mixed_with_diff_194.csv', index=False)
 
     print('GAHGS {}, {:.0f}'.format(penalty.sum(), accounting_cost.sum()))
 

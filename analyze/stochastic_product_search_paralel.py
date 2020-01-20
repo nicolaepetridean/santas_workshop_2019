@@ -236,39 +236,47 @@ def stochastic_product_search(top_k_jump, top_k, fam_size, original,
     np.random.seed(random_state)
     SCHUFFLE_list_loc = SCHUFFLE_list
 
-    last_change = 0
-    best_ever = 69257.09
+    best_ever = 69203
+    since_last_best = 20000
+    should_jump = False
 
     for i in range(n_iter):
         if n_iter > 100:
-            fam_size = np.random.choice([3,4,5,6,7], size=1)[0]
+            fam_size = np.random.choice([3,4,5], size=1)[0]
             top_k = np.random.choice([2,3], size=1)[0]
         fam_indices = np.random.choice(SCHUFFLE_list_loc, size=fam_size)
         changes = np.array(list(product(*DESIRED[fam_indices, top_k_jump:top_k].tolist())))
-        last_change += 1
+        since_last_best += 1
         for change in changes:
             new = best.copy()
             new[fam_indices] = change
 
             new_score, new_acc, new_pen_cost = cost_function(new)
 
-            if new_score < best_score or (last_change > 300 and 0 < int(new_score - best_score) <= 9):
+            if (new_score < best_score and should_jump is False) or (0 < int(new_score - best_score) <=6 and should_jump is True and new_score-90 < best_ever):
                 best_score = new_score
                 best = new
+
                 if new_score < best_ever:
+                    since_last_best = 0
                     best_ever = new_score
                     sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
                     sub['assigned_day'] = best + 1
-                    sub.to_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/submission_on_mip_32_' + str(
+                    sub.to_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/submission_on_mip_202_' + str(
                         best_score) + '.csv', index=False)
-                last_change = 0
+
+            if since_last_best > 70000:
+                should_jump = True
+
+            if since_last_best > 74000:
+                should_jump = False
+                since_last_best = 0
 
         if verbose and i % verbose == 0:
             print(f"Iteration #{i}: Best score is {best_score:.2f}      ", end='\r')
 
         if verbose2 and i % verbose2 == 0:
             print(f"Iteration #{i}: Best score is {best_score:.2f}      ")
-            print(f"Iteration #{i}: Last change is {last_change:.2f}      ")
             print(f"Iteration #{i}: new score is {new_score:.2f}      ")
             print(f"Iteration #{i}: best ever score is {best_ever:.2f}      ")
             print(f"Iteration #{i}: family indices are {str(fam_indices)}      ")
@@ -349,7 +357,7 @@ if __name__ == '__main__' :
     MAX_OCCUPANCY = 300
     MIN_OCCUPANCY = 125
 
-    data = pd.read_csv('D:\\jde\\projects\\santas_workshop_2019\\santadata\\family_data.csv', index_col='family_id')
+    data = pd.read_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/family_data.csv', index_col='family_id')
 
     FAMILY_SIZE = data.n_people.values
     DESIRED     = data.values[:, :-1] - 1
@@ -357,7 +365,7 @@ if __name__ == '__main__' :
     PCOSTM = GetPreferenceCostMatrix(data) # Preference cost matrix
     ACOSTM = GetAccountingCostMatrix()     # Accounting cost matrix
 
-    prediction = load_solution_data('submission_on_jump_69227.33085629047.csv')
+    prediction = load_solution_data('sample_submission_69185.csv')
 
     prediction = prediction['assigned_day'].to_numpy()
     prediction = prediction - 1
@@ -366,8 +374,8 @@ if __name__ == '__main__' :
 
     iteration = 1
 
-    fam_size_out = 5
-    n_iter = 13000000
+    fam_size_out = 3
+    n_iter = 40000000
 
     initial_data = return_family_data()
     #prediction, SCHUFFLE_list = make_a_move(prediction)
@@ -380,12 +388,12 @@ if __name__ == '__main__' :
                 original=prediction,
                 n_iter=n_iter,
                 verbose=1000,
-                verbose2=500,
-                random_state=4809,
+                verbose2=5000,
+                random_state=4403,
                 )
         prediction = final
 
         sub = pd.DataFrame(range(N_FAMILIES), columns=['family_id'])
         sub['assigned_day'] = final + 1
-        sub.to_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/submission_on_mip_' + str(fam_size_out) + '.csv', index=False)
+        sub.to_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/submission_on_mip_202_' + str(fam_size_out) + '.csv', index=False)
         fam_size_out -= 1

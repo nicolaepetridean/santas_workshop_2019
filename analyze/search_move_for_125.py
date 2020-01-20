@@ -162,7 +162,7 @@ def get_accounting_cost_per_day(daily_occupancy):
 if __name__ == "__main__":
     initial_data = return_family_data()
 
-    solution = load_solution_data('submission_on_jump_69366.35788195278.csv')
+    solution = load_solution_data('submission_on_jump_69227.33085629047.csv')
 
     print('total INITIAL cost would be' + str(np.sum(get_choice_cost(np.ndarray.flatten(np.array(solution)), initial_data))))
 
@@ -174,45 +174,22 @@ if __name__ == "__main__":
 
     ii = 0
     size = 2
-    candidates = []
+    already_in = []
     not_done = True
-    to_stay = []
-    to_stay_size = []
     while ii < solution.shape[0]:
         if solution.iloc[ii]['assigned_day'] == 37:
-            candidates.append(ii)
+            already_in.append(ii)
         ii += 1
 
-    # while not_done:
-    #     for room in candidates:
-    #         if room not in to_stay and np.sum(to_stay_size) <= 123:
-    #             if (123 - np.sum(to_stay_size) >= initial_data.iloc[room, 11]):
-    #                 to_stay.append(room)
-    #                 to_stay_size.append(initial_data.iloc[room, 11])
-    #                 continue
-    #             if 125 - np.sum(to_stay_size) == initial_data.iloc[room, 11]:
-    #                 to_stay.append(room)
-    #                 to_stay_size.append(initial_data.iloc[room, 11])
-    #     if np.sum(to_stay_size) >= 120:
-    #         not_done = False
 
-    to_move = []
-    for room in candidates:
-        if initial_data.iloc[room, 11] == 3:
-            to_move.append(room)
-            break
-
-    # for item in candidates:
-    #     if item not in to_stay:
-    #         to_move.append(item)
-
-    for item in to_move:
-        for ch in range(1, 6):
-            if initial_data.iloc[item, ch] != 76 and daily_load[initial_data.iloc[item, ch]] + initial_data.iloc[item, 11] <= 300:
-                daily_load[initial_data.iloc[item, ch]] += initial_data.iloc[item, 11]
-                solution.iloc[item]['assigned_day'] = initial_data.iloc[item, ch]
+    for item in range(1, initial_data.shape[0]):
+        if (initial_data.iloc[item, 1] == 37 or initial_data.iloc[item, 2] == 37) and item not in [1865, 2686, 4944]:
+            if item not in already_in:
+                if daily_load[solution.iloc[item]['assigned_day']] > 133:
+                    solution.iloc[item]['assigned_day'] = 37
+                    break
 
     sub = pd.DataFrame(range(5000), columns=['family_id'])
     sub['assigned_day'] = solution['assigned_day']
-    sub.to_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/move_125_day_76.csv',
+    sub.to_csv('/Users/nicolaepetridean/jde/projects/santas_workshop_2019/santadata/move_125_day_37.csv',
                index=False)
